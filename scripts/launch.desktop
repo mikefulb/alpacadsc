@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=DaveEkSettingCirclesServer
+Comment=
+Exec="/home/msf/Projects/Astronomy/Utilities/dsc_alpaca_server/scripts/launch.sh --profile 8inchDob"
+Icon=/path/to/icon
+Terminal=true
+Type=Application
