@@ -1,3 +1,23 @@
+#
+# Device driver for Dave Ek's style setting circles
+#
+# Copyright 2020 Michael Fulbright
+#
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 import logging
 from astropy.coordinates import EarthLocation, AltAz, SkyCoord
 from astropy.time import Time
@@ -8,7 +28,15 @@ from AlpacaBaseDevice import ALPACA_ERROR_STRINGS
 from AlpacaBaseDevice import ALPACA_ERROR_NOTIMPLEMENTED
 
 class DaveEkSettingCircles(AlpacaBaseDevice):
+    """
+    Driver for Dave Ek's style setting circles
+    """
     def __init__(self, encoders):
+        """
+        Initialize driver object.
+
+        :param encoders: Encoder object used to communicate with encoders
+        """
         super().__init__()
 
         self.driver_version = 0.1
@@ -83,6 +111,19 @@ class DaveEkSettingCircles(AlpacaBaseDevice):
 
     # handle device specific actions or pass to base
     def get_action_handler(self, action):
+        """
+        Handle get actions.
+
+        :param action: Action URI.
+        :type action: str
+
+        :returns:
+          (dict) For requested action return dict with:
+
+                'Value': return value for get request
+                'ErrorNumber': error result for request
+                'ErrorString': string corresponding to error number
+        """
         #logging.debug(f'TestTelescopeDevice::get_action_handler(): action = {action}')
         resp = {}
         resp['ErrorNumber'] = 0
@@ -133,7 +174,21 @@ class DaveEkSettingCircles(AlpacaBaseDevice):
         return resp
 
     def put_action_handler(self, action, forms):
-        logging.debug(f'TestTelescopeDevice::put_action_handler(): action = {action}')
+        """
+        Handle put actions.
+
+        :param action: Action URI.
+        :type action: str
+        :param forms: Data for put action
+
+        :returns:
+          (dict) For requested action return dict with:
+
+                'Value': return value for get request
+                'ErrorNumber': error result for request
+                'ErrorString': string corresponding to error number
+        """
+        #logging.debug(f'TestTelescopeDevice::put_action_handler(): action = {action}')
         resp = {}
         resp['ErrorNumber'] = 0
         resp['ErrorString'] = ''
@@ -186,15 +241,32 @@ class DaveEkSettingCircles(AlpacaBaseDevice):
         return resp
 
     def connect(self):
+        """
+        Attempts to connect to device
+        """
         logging.debug('TestTelescopeDevice:connect() called')
         self.connected = True
 
     def disconnect(self):
+        """
+        Disconnects from device
+        """
         logging.debug('TestTelescopeDevice:disconnect() called')
         self.connected = False
 
     def convert_encoder_position_to_altaz(self, enc_alt, enc_az):
+        """
+        Converts from raw encoder values to sky alt/az values.
 
+        *note* Driver must be synchronized or value will be meaningless.
+
+        :param enc_alt: Raw encoder alitude value
+        :param enc_az: Raw encoder azimuth value
+
+        :returns:
+            (float, float) Sky altitude/azimuth positions or None if device is
+                           not synchronized yet
+        """
         if None in [self.enc_alt0, self.enc_az0, self.syncpos_alt, self.syncpos_az]:
             logging.error('convert_encoder_position_to_altaz: No transformation setup!')
             return None
@@ -238,6 +310,15 @@ class DaveEkSettingCircles(AlpacaBaseDevice):
         return cur_alt, cur_az
 
     def get_current_radec(self):
+        """
+        Returns current RA/DEC of where device is pointing.
+
+        *note* Driver must be synchronized or value will be meaningless.
+
+        :returns:
+            (float, float) RA/DEC position or None if device is
+                           not synchronized yet
+        """
         if None in [self.enc_alt0, self.enc_az0, self.syncpos_alt, self.syncpos_az]:
             logging.error('get_current_radec: No transformation setup!')
             return None
@@ -262,6 +343,15 @@ class DaveEkSettingCircles(AlpacaBaseDevice):
         return cur_radec
 
     def sync_to_coordinates(self, ra, dec):
+        """
+        Synchronize device to RA/DEC position.
+
+        :param ra: RA position
+        :param dec: DEC position
+
+        :returns:
+            (int) Return code 0 = success -1 = failure
+        """
         # find alt/az matching ra/dec and setup transfortmation from encoders
         # alt/az values from this
 

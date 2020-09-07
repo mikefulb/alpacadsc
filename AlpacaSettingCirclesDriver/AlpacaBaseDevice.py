@@ -1,5 +1,5 @@
 #
-# Alpaca Server In Thread Using Flask
+# Alpaca Base Device Driver Class
 #
 # Copyright 2020 Michael Fulbright
 #
