@@ -39,8 +39,11 @@ class AlpacaDeviceServer(Thread):
 
 
         :param device: AlpacaBaseDevice object for actual device driver
+        :type device: AlpacaBaseDevice
         :param host: Address to bind to - defaults to localhost
+        :type host: str
         :param port: Port to bind to - defaults to 8000
+        :type port: int
 
         """
         super().__init__()
@@ -68,6 +71,7 @@ class AlpacaDeviceServer(Thread):
         to the actual device driver to handle.
 
         :param action: Alpaca REST action requested
+        :type action: str
 
         """
         #logging.debug(f'core_get_action_handler(): action = {action}')
@@ -102,6 +106,7 @@ class AlpacaDeviceServer(Thread):
         to the actual device driver to handle.
 
         :param action: Alpaca REST action requested
+        :type action: str
 
         """
         #logging.debug(f'core_put_action_handler(): action = {action}')

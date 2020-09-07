@@ -3,19 +3,19 @@
 #
 # Copyright 2020 Michael Fulbright
 #
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
 import glob
@@ -28,7 +28,7 @@ def get_base_config_dir():
     Find base path for where to store config files depending on platform.
 
     :returns:
-        Root path of where config files are stored or None if location
+        (str) Root path of where config files are stored or None if location
         could not be determined for platform.
     """
     if os.name == 'nt':
@@ -36,7 +36,7 @@ def get_base_config_dir():
     elif os.name == 'posix':
         basedir = os.path.join(os.path.expanduser('~'), '.config')
     else:
-        logging.error('ProgramSettings: Unable to determine OS for config_dir loc!')
+        logging.error('Profile: Unable to determine OS for config_dir loc!')
         basedir = None
     return basedir
 
@@ -46,18 +46,32 @@ def find_profiles(loc):
     relative to the base path for config files for the given platform.
 
     :param loc: Directory relative to base config path to search for profiles
-    :type name: str
+    :type loc: str
+
+    :note: Assumes profile configuration files end with '.yaml'
 
     :returns:
-        List of profiles found or None if none available.
+        (list) List of profiles found or None if none available.
     """
     config_glob = os.path.join(get_base_config_dir(), loc, '*.yaml')
     ini_files = sorted(glob.glob(config_glob))
     return ini_files
 
 def set_current_profile(loc, current_profile_name):
-    """ Write current_profile.yaml file with name of current profile. """
+    """
+    Write current_profile.yaml file with name of current profile.
 
+    :param loc: Directory relative to base config path to search for profiles
+    :type loc: str
+
+    :param current_profile_name: Name of current active profile - do NOT include
+                                 a '.yaml' extension on the profile name.
+    :type current_profile_name: str
+
+    :returns:
+        (bool) Whether operation was successful or not
+
+    """
     basedir = get_base_config_dir()
     if basedir is None:
         return False
@@ -72,8 +86,16 @@ def set_current_profile(loc, current_profile_name):
     return True
 
 def get_current_profile(loc):
-    """ Read current_profile.yaml file to get name of current profile. """
+    """
+    Read current_profile.yaml file to get name of current profile.
 
+    :param loc: Directory relative to base config path to search for profiles
+    :type loc: str
+
+    :returns:
+        (str) Name of currently active profile or None if none defined.
+
+    """
     basedir = get_base_config_dir()
     if basedir is None:
         return False
@@ -93,7 +115,15 @@ def get_current_profile(loc):
 
 @dataclass
 class ProfileSection(object):
+    """
+    A ProfileSection is a subtree member of a Profile and contains its own
+    set of key/value pairs.  Multiple ProfileSection's can be added to a
+    Profile to give parameters different namespaces in the Profile.'
+    """
     def _property_keys(self):
+        """
+        Return a list of the property names in this ProfileSection.
+        """
 #        logging.info(f'{self.__class__.__name__}._property_keys()')
 #        logging.info(f'{self.__dict__}')
 #        for k, v in self.__dict__.items():
@@ -101,6 +131,13 @@ class ProfileSection(object):
         return sorted(x for x in self.__dict__ if x[0] != '_')
 
     def _to_dict(self):
+        """
+        Convert ProfileSection to a dictionary which can be used to
+        produce a yaml output file.
+
+        :returns:
+            (dict) Dictionary representation of ProfileSection
+        """
         #logging.info(f'class {self.__class__.__name__}.to_dict():')
         d = {}
         #logging.info(f' property_keys = {self._property_keys()}')
@@ -111,6 +148,12 @@ class ProfileSection(object):
         return d
 
     def _from_dict(self, d):
+        """
+        Initialize a ProfileSection from a dictionary.
+
+        :param d: Dictionary to use to initialize object.
+        :type d: dict
+        """
         #logging.info(f'ProfileSection _from_dict {d}')
         for k, v in d.items():
             #logging.info(f' copying key {k} value = {v}')
@@ -118,6 +161,16 @@ class ProfileSection(object):
         #logging.info(f' final __dict__ = {self.__dict__}')
 
     def get(self, key, default=None):
+        """
+        Retrieve parameter from ProfileSection by key name.  Default value
+        used if key not found in ProfileSection.
+
+        :param key: Name of parameter to retrieve
+        :type key: str
+        :param default: Optional default value if key not present
+        :returns:
+            Parameter value or default value if not present.
+        """
         try:
             val = self.__getattribute__(key)
         except AttributeError:
@@ -125,6 +178,9 @@ class ProfileSection(object):
         return val
 
     def __repr__(self):
+        """
+        Returns string representation of ProfileSection
+        """
         s = f'{self.__class__.__name__}('
         ks = self.property_keys()
         i = 0
@@ -141,24 +197,27 @@ class ProfileSection(object):
 
 class Profile:
 
-    """Stores program settings which can be saved persistently"""
+    """
+    Stores program settings which can be saved persistently.  Supports
+    ProfileSection's which allow a hierarchical namespace for parameters.
+    """
+
     def __init__(self, reldir, name=None):
-        """Set some defaults for program settings
+        """
+        Set some defaults for program settings
 
-        reldir - location relative to top of default config location
-                 If None then will be relative to current working directory!
-              ex. "hfdfocus/devices" would create the dir "hfdfocus/device"
+        :param reldir: location relative to top of default config location
+                 If None then will be relative to current working directory.
+        :type reldir: str
 
-        name - name of config file
-               If set to None then a default will be searched for.
+        :param name: name of profile config file
+        :type name: str
 
-        reldir = "hfdfocus/devices" and name = "C8F7.ini" would create
-        a file  <configbasedir>/hfdfocus/C8F7.ini
-
-        Will raise NoDefaultProfile is name is None and no profile is defined
+        :note:
+        reldir = "hfdfocus/" and name = "C8F7.yaml" would create
+        a file  <configbasedir>/hfdfocus/C8F7.yaml
 
         """
-        #self._config = ConfigObj(unrepr=True, file_error=True, raise_errors=True)
         self._config_reldir = reldir
 
         self._config_filename = name
@@ -169,30 +228,69 @@ class Profile:
         self.sections = {}
 
     def add_section(self, sectionclass):
+        """
+        Add a section to Profile.
+
+        :param sectionclass: Section to be added.
+        :type sectionclass: ProfileSection
+        """
         self.sections[sectionclass._sectionname] = sectionclass
         self.__dict__[sectionclass._sectionname] = sectionclass()
 
     def _get_config_dir(self):
+        """
+        Find base path for where to store config files depending on platform.
+
+        :returns:
+            (str) Root path of where config files are stored or None if location
+            could not be determined for platform.
+        """
+
+
         if self._config_reldir is None:
             return '.'
-        if os.name == 'nt':
-            base_config_dir = get_base_config_dir()
-            config_dir = os.path.join(base_config_dir, self._config_reldir)
-        elif os.name == 'posix':
-            base_config_dir = get_base_config_dir()
-            config_dir = os.path.join(base_config_dir, self._config_reldir)
-        else:
-            logging.error('ProgramSettings: Unable to determine OS for config_dir loc!')
-            config_dir = None
-        return config_dir
+
+        return get_base_config_dir()
+
+        # FIXME: This function is probably a duplicate of get_base_config_dir and
+        # duplicated could below can be removed
+
+#        if os.name == 'nt':
+#            base_config_dir = get_base_config_dir()
+#            config_dir = os.path.join(base_config_dir, self._config_reldir)
+#        elif os.name == 'posix':
+#            base_config_dir = get_base_config_dir()
+#            config_dir = os.path.join(base_config_dir, self._config_reldir)
+#        else:
+#            logging.error('Profile: Unable to determine OS for config_dir loc!')
+#            config_dir = None
+#        return config_dir
 
     def _get_config_filename(self):
+        """
+        Create full path to profile config file
+
+        :returns:
+            (str) Full path to profile config file.
+        """
         return os.path.join(self._get_config_dir(), self._config_filename)
 
     def filename(self):
+        """
+        Return profile config filename.
+
+        :returns:
+            (str) Profile filename
+        """
         return self._get_config_filename()
 
     def write(self):
+        """
+        Write profile config file.
+
+        :returns:
+            (bool) Whether or not write succeeded.
+        """
         # NOTE will overwrite existing without warning!
         logging.debug(f'Configuration files stored in {self._get_config_dir()}')
 
@@ -219,6 +317,12 @@ class Profile:
         return True
 
     def read(self):
+        """
+        Read profile config file.
+
+        :returns:
+            (bool) Whether or not read succeeded.
+        """
         yaml_f = open(self._get_config_filename(), 'r')
         d = yaml.safe_load(stream=yaml_f)
         yaml_f.close()
@@ -230,6 +334,12 @@ class Profile:
         return True
 
     def __repr__(self):
+        """
+        Return string representation of Profile
+
+        :returns:
+            (str) String representation of Profile
+        """
         s = f'{self.__class__.__name__}('
         ks = self.sections.keys()
 
