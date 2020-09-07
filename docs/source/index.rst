@@ -10,6 +10,7 @@ Welcome to AlpacaSettingCirclesDriver's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   design
    modules
 
 Indices and tables
