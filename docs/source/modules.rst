@@ -6,7 +6,6 @@ AlpacaSettingCirclesDriver
 
    AlpacaBaseDevice
    AlpacaDeviceServer
-   AlpacaServer
    DaveEkSettingCircles
    DaveEkSettingCirclesProfile
    EncodersAltAzDaveEk

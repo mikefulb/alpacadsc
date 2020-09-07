@@ -1,14 +1,21 @@
 #
-# handles a profile
+# General profile storage persistently for program options
 #
-# a profile is a config file describing settings for a given application
-#
-# the profile can be specified by a name 'C8Mach1' or if a profile
-# name is not supplied a default will be loaded
-#
-# the default must be specified - there is no default profile by default
+# Copyright 2020 Michael Fulbright
 #
 #
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
 import glob
@@ -17,6 +24,13 @@ from dataclasses import dataclass
 import yaml
 
 def get_base_config_dir():
+    """
+    Find base path for where to store config files depending on platform.
+
+    :returns:
+        Root path of where config files are stored or None if location
+        could not be determined for platform.
+    """
     if os.name == 'nt':
         basedir = os.path.expandvars('%APPDATA%')
     elif os.name == 'posix':
@@ -27,7 +41,16 @@ def get_base_config_dir():
     return basedir
 
 def find_profiles(loc):
-    """ Assumes profiles end with .ini """
+    """
+    Return list of existing profiles in given location loc.  The location loc is
+    relative to the base path for config files for the given platform.
+
+    :param loc: Directory relative to base config path to search for profiles
+    :type name: str
+
+    :returns:
+        List of profiles found or None if none available.
+    """
     config_glob = os.path.join(get_base_config_dir(), loc, '*.yaml')
     ini_files = sorted(glob.glob(config_glob))
     return ini_files
