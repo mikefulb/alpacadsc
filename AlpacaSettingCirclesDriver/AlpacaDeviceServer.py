@@ -1,9 +1,25 @@
+#
+# Alpaca Server In Thread Using Flask
+#
+# Copyright 2020 Michael Fulbright
+#
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import json
 import logging
 from threading import Thread
-
-#from bottle import Bottle
-#from bottle import request, response
 
 from flask import Flask, request
 
@@ -11,19 +27,24 @@ _alpaca_url_base = '/api/v1/telescope/0'
 
 class AlpacaDeviceServer(Thread):
     def __init__(self, device, host='localhost', port=8000):
+        """
+        Initialize AlpacaDeviceServer.  Accepts a AlpacaBaseDevice
+        object which does the real work.  This class services the
+        Alpaca REST API requests.
+
+
+        :param device: AlpacaBaseDevice object for actual device driver
+        :param host: Address to bind to - defaults to localhost
+        :param port: Port to bind to - defaults to 8000
+
+        :return: None
+        """
         super().__init__()
 
         self.device = device
         self.host = host
         self.port = port
-        #self.app = Bottle()
         self.app = Flask(__name__)
-
-        #self.app.route(_alpaca_url_base + '/<action>', method='GET',
-        #               callback=self.core_get_action_handler)
-        #self.app.route(_alpaca_url_base + '/<action>', method='PUT',
-        #               callback=self.core_put_action_handler)
-        #self.server_transaction_id = 0
 
         self.app.add_url_rule(_alpaca_url_base + '/<action>', methods=['GET'],
                               view_func=self.core_get_action_handler)
@@ -58,7 +79,6 @@ class AlpacaDeviceServer(Thread):
         resp['ErrorString'] = action_resp['ErrorString']
         resp['Value'] = action_resp['Value']
 
-        #response.headers['Content-Type'] = 'application/json'
         return json.dumps(resp), 200, {'Content-Type' : 'application/json'}
 
     def core_put_action_handler(self, action):
@@ -85,7 +105,6 @@ class AlpacaDeviceServer(Thread):
         resp['ErrorNumber'] = action_resp['ErrorNumber']
         resp['ErrorString'] = action_resp['ErrorString']
 
-        #response.headers['Content-Type'] = 'application/json'
         return json.dumps(resp), 200, {'Content-Type' : 'application/json'}
 
     def run(self):
