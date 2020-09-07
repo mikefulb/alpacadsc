@@ -3,7 +3,7 @@ from astropy.coordinates import EarthLocation, AltAz, SkyCoord
 from astropy.time import Time
 from astropy import units as u
 from AlpacaBaseDevice import AlpacaBaseDevice
-from AlpacaBaseDevice import ALPCA_ALIGNMENT_ALTAZ
+from AlpacaBaseDevice import ALPACA_ALIGNMENT_ALTAZ
 from AlpacaBaseDevice import ALPACA_ERROR_STRINGS
 from AlpacaBaseDevice import ALPACA_ERROR_NOTIMPLEMENTED
 
@@ -18,7 +18,7 @@ class DaveEkSettingCircles(AlpacaBaseDevice):
         self.supported_actions = []
 
         # alt/az
-        self.alignmentmode = ALPCA_ALIGNMENT_ALTAZ
+        self.alignmentmode = ALPACA_ALIGNMENT_ALTAZ
         self.aperturearea = 0
         self.aperturediameter = 0
         self.canfindhome = False

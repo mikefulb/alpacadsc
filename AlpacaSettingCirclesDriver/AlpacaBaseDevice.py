@@ -1,3 +1,21 @@
+#
+# Alpaca Server In Thread Using Flask
+#
+# Copyright 2020 Michael Fulbright
+#
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 
 # error codes from https://ascom-standards.org/Help/Developer/html/T_ASCOM_ErrorCodes.htm
@@ -16,9 +34,9 @@ ALPACA_ERROR_STRINGS = {
                        }
 
 # alignment modes
-ALPCA_ALIGNMENT_ALTAZ = 0
-ALPCA_ALIGNMENT_POLAR = 1
-ALPCA_ALIGNMENT_GERMANPOLAR = 2
+ALPACA_ALIGNMENT_ALTAZ = 0
+ALPACA_ALIGNMENT_POLAR = 1
+ALPACA_ALIGNMENT_GERMANPOLAR = 2
 
 class AlpacaBaseDevice:
 
@@ -37,11 +55,19 @@ class AlpacaBaseDevice:
         self.supported_actions = []
 
     def common_get_action_handler(self, action):
-        # for requested action return dict with:
-        #  'Value': return value for get request
-        #  'ErrorNumber': error result for request
-        #  'ErrorString': string corresponding to error number
-        #
+        """
+        Handle get actions common to all devices.
+
+        :param action: Action URI.
+        :type action: str
+
+        :returns:
+          (dict) For requested action return dict with:
+
+                'Value': return value for get request
+                'ErrorNumber': error result for request
+                'ErrorString': string corresponding to error number
+        """
         resp = {}
         resp['ErrorNumber'] = 0
         resp['ErrorString'] = ''
@@ -77,12 +103,39 @@ class AlpacaBaseDevice:
         return resp
 
     def get_action_handler(self, action):
+        """
+        Handle get actions.
+
+        :param action: Action URI.
+        :type action: str
+
+        :returns:
+          (dict) For requested action return dict with:
+
+                'Value': return value for get request
+                'ErrorNumber': error result for request
+                'ErrorString': string corresponding to error number
+        """
         # try base actions
         common_resp = self.common_get_action_handler(action)
 
         return common_resp
 
     def common_put_action_handler(self, action, forms):
+        """
+        Handle put actions common to all devices.
+
+        :param action: Action URI.
+        :type action: str
+        :param forms: Data for put action
+
+        :returns:
+          (dict) For requested action return dict with:
+
+                'Value': return value for get request
+                'ErrorNumber': error result for request
+                'ErrorString': string corresponding to error number
+        """
         resp = {}
         resp['ErrorNumber'] = 0
         resp['ErrorString'] = ''
@@ -114,7 +167,20 @@ class AlpacaBaseDevice:
         return resp
 
     def put_action_handler(self, action, forms):
-        # try base actions
+        """
+        Handle put actions common to all devices.
+
+        :param action: Action URI.
+        :type action: str
+        :param forms: Data for put action
+
+        :returns:
+          (dict) For requested action return dict with:
+
+                'Value': return value for get request
+                'ErrorNumber': error result for request
+                'ErrorString': string corresponding to error number
+        """
         common_resp = self.common_put_action_handler(action, forms)
 
         return common_resp
