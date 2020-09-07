@@ -26,6 +26,11 @@ from flask import Flask, request
 _alpaca_url_base = '/api/v1/telescope/0'
 
 class AlpacaDeviceServer(Thread):
+    """
+    AlpacaDeviceServer class creates a Flask app in a thread that
+    handles all REST API calls from an Alpaca client.
+    """
+
     def __init__(self, device, host='localhost', port=8000):
         """
         Initialize AlpacaDeviceServer.  Accepts a AlpacaBaseDevice
@@ -37,7 +42,6 @@ class AlpacaDeviceServer(Thread):
         :param host: Address to bind to - defaults to localhost
         :param port: Port to bind to - defaults to 8000
 
-        :return: None
         """
         super().__init__()
 
@@ -57,6 +61,15 @@ class AlpacaDeviceServer(Thread):
 
    # @route(_alpaca_url_base + '/<action>', method='GET')
     def core_get_action_handler(self, action):
+        """
+        Endpoint for all GET actions for Alpaca server.
+
+        This function is a wrapper that handles the request and passes it
+        to the actual device driver to handle.
+
+        :param action: Alpaca REST action requested
+
+        """
         #logging.debug(f'core_get_action_handler(): action = {action}')
 
         # methods common to all devices
@@ -82,6 +95,15 @@ class AlpacaDeviceServer(Thread):
         return json.dumps(resp), 200, {'Content-Type' : 'application/json'}
 
     def core_put_action_handler(self, action):
+        """
+        Endpoint for all PUT actions for Alpaca server.
+
+        This function is a wrapper that handles the request and passes it
+        to the actual device driver to handle.
+
+        :param action: Alpaca REST action requested
+
+        """
         #logging.debug(f'core_put_action_handler(): action = {action}')
 
         # methods common to all devices
@@ -108,5 +130,11 @@ class AlpacaDeviceServer(Thread):
         return json.dumps(resp), 200, {'Content-Type' : 'application/json'}
 
     def run(self):
-        self.app.run(host=self.host, port=self.port) #, debug=True, quiet=True)
+        """
+        Starts the Alpaca Device Server in a thread.
+
+        :return: None
+
+        """
+        self.app.run(host=self.host, port=self.port)
 
