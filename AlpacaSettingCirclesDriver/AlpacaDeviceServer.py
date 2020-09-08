@@ -35,17 +35,31 @@ class AlpacaDeviceServer(Thread):
     """
 
     class EndpointHandler:
-
+        """
+        Handler for endpoints - allows code reuse since all endpoints
+        require similar handlers.
+        """
         def __init__(self, outer, handler, method):
+            """
+
+            :param outer: Object for AlpacaDeviceServer this handler
+                          is being created for.  Needed to access
+                          server transaction ID so these can be
+                          incremented each time an endpoint is handled.
+            :type outer: AlpacaDeviceServer
+            :param handler: Handler function.
+            :param method: Method handled - 'GET' or 'PUT'
+            :type method: str
+            """
             self.outer = outer
             self.handler = handler
             self.method = method
             self.__name__ = __name__
 
         def __call__(self, *args, **kwargs):
-
-            print(args)
-            print(kwargs)
+            """
+            Common handler code for all endpoints.
+            """
 
             resp = {}
             try:
@@ -91,18 +105,11 @@ class AlpacaDeviceServer(Thread):
         self.port = port
         self.app = Flask(__name__)
 
-#        self.app.add_url_rule(_alpaca_url_base + '/<action>', methods=['GET'],
-#                              view_func=self.core_get_action_handler)
-
         self.app.add_url_rule(_alpaca_url_base + '/<action>',
                               'GET_ACTION',
                               methods=['GET'],
                               view_func=self.EndpointHandler(self, self.device.get_action_handler, 'GET'))
 
-#        self.app.add_url_rule(_alpaca_url_base + '/<action>',
-#                              'PUT_ACTION',
-#                              methods=['PUT'],
-#                              view_func=self.core_put_action_handler)
 
         self.app.add_url_rule(_alpaca_url_base + '/<action>',
                               'PUT_ACTION',
@@ -113,84 +120,6 @@ class AlpacaDeviceServer(Thread):
 
         # die if main dies
         self.daemon = True
-
-
-    #
-    # FIXME: Should somehow combine action and setup handlers into sharing more
-    #        code as currently they are almost identical!
-    #
-
-
-    def core_get_action_handler(self, action):
-        """
-        Endpoint for all GET actions for Alpaca server.
-
-        This function is a wrapper that handles the request and passes it
-        to the actual device driver to handle.
-
-        :param action: Alpaca REST action requested
-        :type action: str
-
-        """
-        #logging.debug(f'core_get_action_handler(): action = {action}')
-
-        # methods common to all devices
-#        logging.debug('get request:')
-#        for k, v in request.query.items():
-#            logging.debug(f'   {k} : {v}')
-
-        resp = {}
-        try:
-            resp['ClientTransactionID'] = request.query['ClientTransactionID']
-        except:
-            logging.warning('request missing client id!')
-
-        resp['ServerTransactionID'] = self.server_transaction_id
-        self.server_transaction_id += 1
-
-        action_resp = self.device.get_action_handler(action)
-
-        resp['ErrorNumber'] = action_resp['ErrorNumber']
-        resp['ErrorString'] = action_resp['ErrorString']
-        resp['Value'] = action_resp['Value']
-
-        return json.dumps(resp), 200, {'Content-Type' : 'application/json'}
-
-    def core_put_action_handler(self, action):
-        """
-        Endpoint for all PUT actions for Alpaca server.
-
-        This function is a wrapper that handles the request and passes it
-        to the actual device driver to handle.
-
-        :param action: Alpaca REST action requested
-        :type action: str
-
-        """
-        #logging.debug(f'core_put_action_handler(): action = {action}')
-
-        # methods common to all devices
-#        logging.debug('put request:')
-#        for k, v in request.query.items():
-#            logging.debug(f'   {k} : {v}')
-
-        resp = {}
-        try:
-            resp['ClientTransactionID'] = request.form['ClientTransactionID']
-        except:
-            logging.warning('request missing client id!')
-
-        resp['ServerTransactionID'] = self.server_transaction_id
-        self.server_transaction_id += 1
-        resp['ErrorNumber'] = 0
-        resp['ErrorString'] = ''
-
-        action_resp = self.device.put_action_handler(action, request.form)
-
-        resp['ErrorNumber'] = action_resp['ErrorNumber']
-        resp['ErrorString'] = action_resp['ErrorString']
-
-        return json.dumps(resp), 200, {'Content-Type' : 'application/json'}
 
     def run(self):
         """
