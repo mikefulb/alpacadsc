@@ -27,7 +27,7 @@ from AlpacaBaseDevice import ALPACA_ALIGNMENT_ALTAZ
 from AlpacaBaseDevice import ALPACA_ERROR_STRINGS
 from AlpacaBaseDevice import ALPACA_ERROR_NOTIMPLEMENTED
 
-class DaveEkSettingCircles(AlpacaBaseDevice):
+class AltAzSettingCircles(AlpacaBaseDevice):
     """
     Driver for Dave Ek's style setting circles
     """
@@ -40,9 +40,9 @@ class DaveEkSettingCircles(AlpacaBaseDevice):
         super().__init__()
 
         self.driver_version = 0.1
-        self.description = 'Dave Ek Setting Cirles'
+        self.description = 'Alt/Az Setting Cirles'
         self.driverinfo = self.description + f' V. {self.driver_version}'
-        self.name = 'DaveEkSettingCircles'
+        self.name = 'AltAzSettingCircles'
         self.supported_actions = []
 
         # alt/az

@@ -20,7 +20,7 @@ from dataclasses import dataclass
 
 from Profiles import Profile, ProfileSection
 
-class DaveEkSettingCirclesProfile(Profile):
+class AltAzSettingCirclesProfile(Profile):
 
     @dataclass
     class Location(ProfileSection):

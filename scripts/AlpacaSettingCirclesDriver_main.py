@@ -19,10 +19,10 @@ import argparse
 from datetime import datetime
 
 from AlpacaDeviceServer import AlpacaDeviceServer
-from DaveEkSettingCircles import DaveEkSettingCircles as TelescopeDevice
-from EncodersAltAzDaveEk import DaveEkAltAzEncoders
-from EncodersAltAzSimulator import SimulatedAltAzEncoders
-from DaveEkSettingCirclesProfile import DaveEkSettingCirclesProfile as Profile
+from AltAzSettingCircles import AltAzSettingCircles as TelescopeDevice
+from EncodersAltAzDaveEk import EncodersAltAzDaveEk
+from EncodersAltAzSimulator import EncodersAltAzSimulated
+from AltAzSettingCirclesProfile import AltAzSettingCirclesProfile as Profile
 from Profiles import find_profiles, set_current_profile, get_current_profile
 
 # base name used for profile storage
@@ -87,12 +87,12 @@ def main(args):
 
 
     if args.simul:
-        encoders = SimulatedAltAzEncoders(res_alt=profile.encoders.alt_resolution,
+        encoders = EncodersAltAzSimulated(res_alt=profile.encoders.alt_resolution,
                              res_az=profile.encoders.az_resolution,
                              reverse_alt=profile.encoders.alt_reverse,
                              reverse_az=profile.encoders.az_reverse)
     else:
-        encoders = DaveEkAltAzEncoders(res_alt=profile.encoders.alt_resolution,
+        encoders = EncodersAltAzDaveEk(res_alt=profile.encoders.alt_resolution,
                                  res_az=profile.encoders.az_resolution,
                                  reverse_alt=profile.encoders.alt_reverse,
                                  reverse_az=profile.encoders.az_reverse)
