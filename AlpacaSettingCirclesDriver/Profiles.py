@@ -250,7 +250,11 @@ class Profile:
         if self._config_reldir is None:
             return '.'
 
-        return get_base_config_dir()
+        base_dir = get_base_config_dir()
+        if base_dir is None:
+            return None
+
+        return os.path.join(base_dir, self._config_reldir)
 
         # FIXME: This function is probably a duplicate of get_base_config_dir and
         # duplicated could below can be removed

@@ -25,11 +25,49 @@ from flask import Flask, request
 
 _alpaca_url_base = '/api/v1/telescope/0'
 
+
+
+
 class AlpacaDeviceServer(Thread):
     """
     AlpacaDeviceServer class creates a Flask app in a thread that
     handles all REST API calls from an Alpaca client.
     """
+
+    class EndpointHandler:
+
+        def __init__(self, outer, handler, method):
+            self.outer = outer
+            self.handler = handler
+            self.method = method
+            self.__name__ = __name__
+
+        def __call__(self, *args, **kwargs):
+
+            print(args)
+            print(kwargs)
+
+            resp = {}
+            try:
+                resp['ClientTransactionID'] = request.query['ClientTransactionID']
+            except:
+                logging.warning('request missing client id!')
+
+            resp['ServerTransactionID'] = self.outer.server_transaction_id
+            self.outer.server_transaction_id += 1
+
+            if self.method == 'PUT':
+                kwargs['forms'] = request.form
+
+            handler_resp = self.handler(*args, **kwargs)
+
+            resp['ErrorNumber'] = handler_resp['ErrorNumber']
+            resp['ErrorString'] = handler_resp['ErrorString']
+
+            if self.method == 'GET':
+                resp['Value'] = handler_resp['Value']
+
+            return json.dumps(resp), 200, {'Content-Type' : 'application/json'}
 
     def __init__(self, device, host='localhost', port=8000):
         """
@@ -53,16 +91,36 @@ class AlpacaDeviceServer(Thread):
         self.port = port
         self.app = Flask(__name__)
 
-        self.app.add_url_rule(_alpaca_url_base + '/<action>', methods=['GET'],
-                              view_func=self.core_get_action_handler)
-        self.app.add_url_rule(_alpaca_url_base + '/<action>', methods=['PUT'],
-                              view_func=self.core_put_action_handler)
+#        self.app.add_url_rule(_alpaca_url_base + '/<action>', methods=['GET'],
+#                              view_func=self.core_get_action_handler)
+
+        self.app.add_url_rule(_alpaca_url_base + '/<action>',
+                              'GET_ACTION',
+                              methods=['GET'],
+                              view_func=self.EndpointHandler(self, self.device.get_action_handler, 'GET'))
+
+#        self.app.add_url_rule(_alpaca_url_base + '/<action>',
+#                              'PUT_ACTION',
+#                              methods=['PUT'],
+#                              view_func=self.core_put_action_handler)
+
+        self.app.add_url_rule(_alpaca_url_base + '/<action>',
+                              'PUT_ACTION',
+                              methods=['PUT'],
+                              view_func=self.EndpointHandler(self, self.device.put_action_handler, 'PUT'))
+
         self.server_transaction_id = 0
 
         # die if main dies
         self.daemon = True
 
-   # @route(_alpaca_url_base + '/<action>', method='GET')
+
+    #
+    # FIXME: Should somehow combine action and setup handlers into sharing more
+    #        code as currently they are almost identical!
+    #
+
+
     def core_get_action_handler(self, action):
         """
         Endpoint for all GET actions for Alpaca server.
@@ -142,4 +200,3 @@ class AlpacaDeviceServer(Thread):
 
         """
         self.app.run(host=self.host, port=self.port)
-
