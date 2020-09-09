@@ -106,6 +106,7 @@ class AlpacaDeviceServer(Thread):
         self.device = device
         self.host = host
         self.port = port
+
         self.app = Flask(__name__)
 
         self.app.add_url_rule('/api' + _alpaca_url_base + '/<action>',

@@ -37,6 +37,8 @@ class AltAzSettingCirclesProfile(Profile):
     @dataclass
     class Encoders(ProfileSection):
         _sectionname : str = 'encoders'
+        # driver
+        driver : str = None
         # serial port
         serial_port : str = None
         # speed

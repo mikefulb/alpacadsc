@@ -31,6 +31,8 @@ from AltAzSettingCirclesProfile import AltAzSettingCirclesProfile as Profile
 from EncodersAltAzDaveEk import EncodersAltAzDaveEk
 #from EncodersAltAzSimulator import EncodersAltAzSimulated
 
+from flask import render_template
+
 # base name used for profile storage
 PROFILE_BASENAME = "AlpacaSettingCirclesDriver"
 
@@ -136,12 +138,17 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         # set as current
         set_current_profile(PROFILE_BASENAME, try_profile)
 
+        self.profile_name = try_profile
+
         # set location
         self.earth_location = EarthLocation(lat=self.profile.location.latitude,
                                             lon=self.profile.location.longitude,
                                             height=self.profile.location.altitude*u.m)
         return True
 
+    def unload_profile(self):
+        self.profile = None
+        self.profile_name = None
 
     def load_encoders(self, encoders_profile):
         """
@@ -330,32 +337,22 @@ class AltAzSettingCircles(AlpacaBaseDevice):
                 'ErrorNumber': error result for request
                 'ErrorString': string corresponding to error number
         """
-        return f"""
-    <html>
-      <head>
-        <title>Alt/Az Setting Circles Driver Setup</title>
-        <style>
-          td {{
-             padding:0 15px;
-          }}
-        </style>
-      </head>
-      <body>
-        <h1>Alt/Az Setting Circles Driver Setup</h1>
-        <h2>Driver Info</h2>
-        <table>
-          <tr><td>Driver Name</td><td>{self.device.name}</td></tr>
-          <tr><td>Driver Info</td><td>{self.device.driverinfo}</td></tr>
-          <tr><td>Driver Description</td><td>{self.device.description}</td></tr>
-          <tr><td>Driver Version</td><td>{self.device.driver_version}</td></tr>
-        </table>
-        <h2>Device Configuration</h2>
-          <h3>Location</h3>
-          <table>
-            <tr><td>Name</td></tr><td>self.
-      </body>
-    </html>
-               """
+
+        # determine if driver is connected or not
+        if not self.connected:
+            # load current profile for purposes of editting
+            self.load_profile()
+
+        output = render_template('device_setup_base.html', driver=self)
+
+        # clear profile if we're not connected - just loaded to render page
+        if not self.connected:
+            self.unload_profile()
+
+        return output
+
+    # FIXME connect/disconnect does not distiguish between clients - is this
+    #       even addressed by the Alpaca standard?  Need to investigate.
     def connect(self):
         """
         Attempts to connect to device
@@ -393,7 +390,7 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         self.encoders.disconnect()
 
         # clear out profile
-        self.profile = None
+        self.unload_profile()
 
         self.connected = False
 

@@ -1,0 +1,57 @@
+<html>
+  <head>
+    <title>Alt/Az Setting Circles Driver Setup</title>
+    <style>
+      td {
+         padding:0 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Alt/Az Setting Circles Driver Setup</h1>
+    <h2>Driver Info</h2>
+    <table>
+      <tr><td>Driver Name</td><td>{{driver.drivername}}</td></tr>
+      <tr><td>Driver Info</td><td>{{driver.driverinfo}}</td></tr>
+      <tr><td>Driver Description</td><td>{{driver.description}}</td></tr>
+      <tr><td>Driver Version</td><td>{{driver.driver_version}}</td></tr>
+    </table>
+
+    <h2>Device Configuration</h2>
+
+    {% if driver.connected %}
+
+        <table><tr><td>Connection Status</td><td>CONNECTED</td></tr></table>
+
+        <p><b>Since driver is CONNECTED configuration cannot be changed.</b>
+        <p><b>Disconnect all clients from driver and reload this page.</b>
+
+    {% else %}
+
+        <table><tr><td>Connection Status</td><td>DISCONNECTED</td></tr></table>
+
+    {% endif %}
+
+    <h2>Profile: {{driver.profile_name}}</h2>
+
+
+    <h3>Location</h3>
+    <table>
+      <tr><td>Name</td><td>{{driver.profile.location.obsname}}</td></tr>
+      <tr><td>Latitude</td><td>{{driver.profile.location.latitude}}</td></tr>
+      <tr><td>Longitude</td><td>{{driver.profile.location.longitude}}</td></tr>
+      <tr><td>Altitude</td><td>{{driver.profile.location.altitude}}</td></tr>
+    </table>
+
+    <h3>Encoders</h3>
+    <table>
+      <tr><td>Driver</td><td>{{driver.profile.encoders.driver}}</td></tr>
+      <tr><td>Serial Port</td><td>{{driver.profile.encoders.serial_port}}</td></tr>
+      <tr><td>Serial Speed</td><td>{{driver.profile.encoders.serial_speed}}</td></tr>
+      <tr><td>Altitude Resolution</td><td>{{driver.profile.encoders.alt_resolution}}</td></tr>
+      <tr><td>Azimuth Resolution</td><td>{{driver.profile.encoders.az_resolution}}</td></tr>
+      <tr><td>Altitude Reversed?</td><td>{{driver.profile.encoders.alt_reverse}}</td></tr>
+      <tr><td>Azimuth Reversed?</td><td>{{driver.profile.encoders.az_reverse}}</td></tr>
+    </table>
+  </body>
+</html>
