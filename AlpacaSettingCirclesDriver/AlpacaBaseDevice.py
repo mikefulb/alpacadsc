@@ -143,6 +143,7 @@ class AlpacaBaseDevice:
         if action == 'connected':
             try:
                 state_string = forms['Connected']
+                logging.debug(f'connected state_string = {state_string} requested')
             except KeyError:
                 logging.error(f'missing value for Connected')
                 resp['ErrorNumber'] = ALPACA_ERROR_INVALIDVALUE
@@ -152,7 +153,7 @@ class AlpacaBaseDevice:
                     resp['ErrorNumber'] = ALPACA_ERROR_INVALIDVALUE
                 else:
                     state = state_string in ['true', 'True']
-                    #logging.debug(f'connected state {state} requested')
+                    logging.debug(f'connected state {state} requested')
                     if state:
                         self.connect()
                     else:

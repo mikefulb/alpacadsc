@@ -20,13 +20,7 @@ from datetime import datetime
 
 from AlpacaDeviceServer import AlpacaDeviceServer
 from AltAzSettingCircles import AltAzSettingCircles as TelescopeDevice
-from EncodersAltAzDaveEk import EncodersAltAzDaveEk
-from EncodersAltAzSimulator import EncodersAltAzSimulated
-from AltAzSettingCirclesProfile import AltAzSettingCirclesProfile as Profile
-from Profiles import find_profiles, set_current_profile, get_current_profile
 
-# base name used for profile storage
-PROFILE_BASENAME = "AlpacaSettingCirclesDriver"
 
 def parse_command_line():
     parser = argparse.ArgumentParser()
@@ -41,68 +35,54 @@ def parse_command_line():
 
 def main(args):
 
-    # list profiles if requested
-    if args.listprofiles:
-        profiles = find_profiles(PROFILE_BASENAME)
-        if len(profiles) > 0:
-            logging.info('Available profiles:')
-            for p in profiles:
-                logging.info(f'    {p}')
-            logging.info('Current profile is:')
-            logging.info(f'    {get_current_profile(PROFILE_BASENAME)}')
-        else:
-            logging.info('No profiles available')
-        sys.exit(0)
+#    # list profiles if requested
+#    if args.listprofiles:
+#        profiles = find_profiles(PROFILE_BASENAME)
+#        if len(profiles) > 0:
+#            logging.info('Available profiles:')
+#            for p in profiles:
+#                logging.info(f'    {p}')
+#            logging.info('Current profile is:')
+#            logging.info(f'    {get_current_profile(PROFILE_BASENAME)}')
+#        else:
+#            logging.info('No profiles available')
+#        sys.exit(0)
+#
+#    # load profile
+#    if args.profile is None:
+#        # see if current profile set
+#        profile_name = get_current_profile(PROFILE_BASENAME)
+#        if profile_name is None:
+#            logging.error('Must specify a profile with --profile')
+#            sys.exit(1)
+#        logging.info(f'Using current profile {profile_name}')
+#    else:
+#        profile_name = args.profile
+#    profile = Profile(PROFILE_BASENAME, profile_name + '.yaml')
+#    profile.read()
+#    print(profile)
+#
+#    # set as current
+#    set_current_profile(PROFILE_BASENAME, profile_name)
 
-    # load profile
-    if args.profile is None:
-        # see if current profile set
-        profile_name = get_current_profile(PROFILE_BASENAME)
-        if profile_name is None:
-            logging.error('Must specify a profile with --profile')
-            sys.exit(1)
-        logging.info(f'Using current profile {profile_name}')
-    else:
-        profile_name = args.profile
-    profile = Profile(PROFILE_BASENAME, profile_name + '.yaml')
-    profile.read()
-    print(profile)
-
-    # set as current
-    set_current_profile(PROFILE_BASENAME, profile_name)
-
-    logging.info(f'Loaded profile {args.profile} from {profile.filename()}:')
-    logging.info(f'Location:')
-    logging.info(f'   Name: {profile.location.obsname}')
-    logging.info(f'   Lat : {profile.location.latitude}')
-    logging.info(f'   Lon : {profile.location.longitude}')
-    logging.info(f'   Alt : {profile.location.altitude} meters')
-    logging.info(f'Encoders:')
-    logging.info(f'   Serial Port   : {profile.encoders.serial_port}')
-    logging.info(f'   Serial Speed  : {profile.encoders.serial_speed}')
-    logging.info(f'   ALT resolution: {profile.encoders.alt_resolution}')
-    logging.info(f'   AZ  resolution: {profile.encoders.az_resolution}')
-    logging.info(f'   Reverse ALT   : {profile.encoders.alt_reverse}')
-    logging.info(f'   Reverse AZ    : {profile.encoders.az_reverse}')
+#    logging.info(f'Loaded profile {args.profile} from {profile.filename()}:')
+#    logging.info(f'Location:')
+#    logging.info(f'   Name: {profile.location.obsname}')
+#    logging.info(f'   Lat : {profile.location.latitude}')
+#    logging.info(f'   Lon : {profile.location.longitude}')
+#    logging.info(f'   Alt : {profile.location.altitude} meters')
+#    logging.info(f'Encoders:')
+#    logging.info(f'   Serial Port   : {profile.encoders.serial_port}')
+#    logging.info(f'   Serial Speed  : {profile.encoders.serial_speed}')
+#    logging.info(f'   ALT resolution: {profile.encoders.alt_resolution}')
+#    logging.info(f'   AZ  resolution: {profile.encoders.az_resolution}')
+#    logging.info(f'   Reverse ALT   : {profile.encoders.alt_reverse}')
+#    logging.info(f'   Reverse AZ    : {profile.encoders.az_reverse}')
 
 
-    if args.simul:
-        encoders = EncodersAltAzSimulated(res_alt=profile.encoders.alt_resolution,
-                             res_az=profile.encoders.az_resolution,
-                             reverse_alt=profile.encoders.alt_reverse,
-                             reverse_az=profile.encoders.az_reverse)
-    else:
-        encoders = EncodersAltAzDaveEk(res_alt=profile.encoders.alt_resolution,
-                                 res_az=profile.encoders.az_resolution,
-                                 reverse_alt=profile.encoders.alt_reverse,
-                                 reverse_az=profile.encoders.az_reverse)
-        encoders.connect(profile.encoders.serial_port,
-                         speed=profile.encoders.serial_speed)
-
-        logging.info(f'Connected to encoders on port {profile.encoders.serial_port}')
 
     # create alpaca device object
-    device = TelescopeDevice(encoders)
+    device = TelescopeDevice(args.profile)
 
     # start api server
     api_server = AlpacaDeviceServer(device)
@@ -135,7 +115,7 @@ if __name__ == '__main__':
 
     # FIXME assumes tz is set properly in system?
     log_timestamp = datetime.now()
-    logfilename = 'DaveEkSettingCirclesServer'
+    logfilename = 'AlpacaSettingCirclesDriver'
     #logfilename += '-' + log_timestamp.strftime('%Y%m%d%H%M%S')
     logfilename += '.log'
 

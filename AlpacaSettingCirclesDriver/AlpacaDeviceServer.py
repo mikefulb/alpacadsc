@@ -21,11 +21,9 @@ import json
 import logging
 from threading import Thread
 
-from flask import Flask, request
+from flask import Flask, Response, request
 
-_alpaca_url_base = '/api/v1/telescope/0'
-
-
+_alpaca_url_base = '/v1/telescope/0'
 
 
 class AlpacaDeviceServer(Thread):
@@ -75,13 +73,18 @@ class AlpacaDeviceServer(Thread):
 
             handler_resp = self.handler(*args, **kwargs)
 
-            resp['ErrorNumber'] = handler_resp['ErrorNumber']
-            resp['ErrorString'] = handler_resp['ErrorString']
+            if isinstance(handler_resp, str):
+                return Response(handler_resp, status=200, headers={})
+            else:
 
-            if self.method == 'GET':
-                resp['Value'] = handler_resp['Value']
+                resp['ErrorNumber'] = handler_resp['ErrorNumber']
+                resp['ErrorString'] = handler_resp['ErrorString']
 
-            return json.dumps(resp), 200, {'Content-Type' : 'application/json'}
+                if self.method == 'GET':
+                    resp['Value'] = handler_resp['Value']
+
+                return json.dumps(resp), 200, {'Content-Type' : 'application/json'}
+
 
     def __init__(self, device, host='localhost', port=8000):
         """
@@ -105,21 +108,76 @@ class AlpacaDeviceServer(Thread):
         self.port = port
         self.app = Flask(__name__)
 
-        self.app.add_url_rule(_alpaca_url_base + '/<action>',
+        self.app.add_url_rule('/api' + _alpaca_url_base + '/<action>',
                               'GET_ACTION',
                               methods=['GET'],
                               view_func=self.EndpointHandler(self, self.device.get_action_handler, 'GET'))
 
-
-        self.app.add_url_rule(_alpaca_url_base + '/<action>',
+        self.app.add_url_rule('/api' + _alpaca_url_base + '/<action>',
                               'PUT_ACTION',
                               methods=['PUT'],
                               view_func=self.EndpointHandler(self, self.device.put_action_handler, 'PUT'))
+
+        # Alpaca defines a global parameters setup for the device at '/setup'
+        self.app.add_url_rule('/setup',
+                              'GET_GLOBAL_SETUP',
+                              methods=['GET'],
+                              view_func=self.EndpointHandler(self, self.get_global_setup_handler, 'GET'))
+
+        # Specific setup for the actual device at '/setup' + _alpaca_url_base + '/setup'
+        logging.info(f"adding endpoint {'/setup' + _alpaca_url_base + '/setup'}")
+        self.app.add_url_rule('/setup' + _alpaca_url_base + '/setup',
+                              'GET_DEVICE_SETUP',
+                              methods=['GET'],
+                              view_func=self.EndpointHandler(self, self.device.get_device_setup_handler, 'GET'))
 
         self.server_transaction_id = 0
 
         # die if main dies
         self.daemon = True
+
+
+    # handle device specific setup
+    def get_global_setup_handler(self):
+        """
+        Handle get global setup requests.
+
+        This returns a info page on the driver.
+
+        :returns:
+          (dict) For requested setup return dict with:
+
+                'Value': return value for get request
+                'ErrorNumber': error result for request
+                'ErrorString': string corresponding to error number
+        """
+        return f"""
+    <html>
+      <head>
+        <title>Alt/Az Setting Circles Alpaca Server Information</title>
+        <style>
+          td {{
+             padding:0 15px;
+          }}
+        </style>
+      </head>
+      <body>
+        <h1>Alt/Az Setting Circles Alpaca Server Information</h1>
+        <h2>Server Info</h2>
+        <table>
+          <tr><td>Alpaca Server Address</td><td>{self.host}</td></tr>
+          <tr><td>Alpaca Server Port</td><td>{self.port}</td></tr>
+        </table>
+        <h2>Driver Info</h2>
+        <table>
+          <tr><td>Driver Name</td><td>{self.device.name}</td></tr>
+          <tr><td>Driver Info</td><td>{self.device.driverinfo}</td></tr>
+          <tr><td>Driver Description</td><td>{self.device.description}</td></tr>
+          <tr><td>Driver Version</td><td>{self.device.driver_version}</td></tr>
+        </table>
+      </body>
+    </html>
+               """
 
     def run(self):
         """

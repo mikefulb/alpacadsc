@@ -35,6 +35,11 @@ class EncodersAltAzDaveEk:
         self.port = port
         self.serial = serial.Serial(port, speed, timeout=5)
 
+    def disconnect(self):
+        if self.serial is not None:
+            self.serial.close()
+        self.serial = None
+
     def get_encoder_resolution(self):
         if self.serial is None:
             logging.error('get_encoder_resolution: not connected!')

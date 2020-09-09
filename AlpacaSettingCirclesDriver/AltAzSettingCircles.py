@@ -17,7 +17,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+import sys
 import logging
 from astropy.coordinates import EarthLocation, AltAz, SkyCoord
 from astropy.time import Time
@@ -26,24 +26,33 @@ from AlpacaBaseDevice import AlpacaBaseDevice
 from AlpacaBaseDevice import ALPACA_ALIGNMENT_ALTAZ
 from AlpacaBaseDevice import ALPACA_ERROR_STRINGS
 from AlpacaBaseDevice import ALPACA_ERROR_NOTIMPLEMENTED
+from Profiles import find_profiles, set_current_profile, get_current_profile
+from AltAzSettingCirclesProfile import AltAzSettingCirclesProfile as Profile
+from EncodersAltAzDaveEk import EncodersAltAzDaveEk
+#from EncodersAltAzSimulator import EncodersAltAzSimulated
+
+# base name used for profile storage
+PROFILE_BASENAME = "AlpacaSettingCirclesDriver"
 
 class AltAzSettingCircles(AlpacaBaseDevice):
     """
-    Driver for Dave Ek's style setting circles
+    Driver for Alt/Az setting circles
     """
-    def __init__(self, encoders):
+    def __init__(self, use_profile=None):
         """
         Initialize driver object.
-
-        :param encoders: Encoder object used to communicate with encoders
         """
         super().__init__()
 
+        # driver info
         self.driver_version = 0.1
         self.description = 'Alt/Az Setting Cirles'
         self.driverinfo = self.description + f' V. {self.driver_version}'
         self.name = 'AltAzSettingCircles'
-        self.supported_actions = []
+        #self.supported_actions = [] # FIXME NOT NEEDED?
+
+        # configuration profile
+        self.profile = None
 
         # alt/az
         self.alignmentmode = ALPACA_ALIGNMENT_ALTAZ
@@ -93,21 +102,87 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         self.utcdate = 0
         self.destinationsideofpier = 0
 
-        # used for setting circle transforms
-        #self.earth_location =None
-
-        # shouldnt hard code!
-        self.earth_location = EarthLocation(lat='35d48m', lon='-78d48m', height=100*u.m)
-
-        # FIXME encoders should be part of class??
-        self.encoders = encoders
-
         self.enc_alt0 = None
         self.enc_az0 = None
         self.syncpos_alt = None
         self.syncpos_az = None
 
 
+    def load_profile(self):
+        # load profile
+        try_profile = None
+
+        # if profile was specified then try using it
+        # FIXME maybe need way to suggest a profile from command line?
+#        if use_profile is not None:
+#            try_profile = use_profile
+
+        # if no suggestion for profile try to find last one used
+        if try_profile is None:
+            try_profile = get_current_profile(PROFILE_BASENAME)
+            if try_profile is not None:
+                logging.info(f'Using current profile {try_profile}')
+
+        if try_profile is None:
+            # FIXME probably shouldnt exit from init() - return exception?
+            logging.error('Must specify a valid profile')
+            sys.exit(1)
+
+
+        self.profile = Profile(PROFILE_BASENAME, try_profile + '.yaml')
+        self.profile.read()
+        logging.info(f'Loaded profile {try_profile} = {self.profile}')
+
+        # set as current
+        set_current_profile(PROFILE_BASENAME, try_profile)
+
+        # set location
+        self.earth_location = EarthLocation(lat=self.profile.location.latitude,
+                                            lon=self.profile.location.longitude,
+                                            height=self.profile.location.altitude*u.m)
+        return True
+
+
+    def load_encoders(self, encoders_profile):
+        """
+        Load encoders and connect.
+
+        :param encoders_profile: Dictionary containing encoder parameters
+
+        :returns: True on success, False if fails.
+        """
+
+        # FIXME hard coded mapping for now need to perhaps make a way to
+        #       dynamically build list of available encoder drivers
+        encoder_drv = encoders_profile.get('driver')
+        logging.info(f'encoder_drv = {encoder_drv}')
+        if encoder_drv is None:
+            logging.error('No encoder driver specified - cannot load encoder driver')
+            # FIXME Raise exception?
+            return False
+
+        if encoder_drv == 'DaveEk':
+            self.encoders = EncodersAltAzDaveEk(res_alt=encoders_profile.alt_resolution,
+                                     res_az=encoders_profile.az_resolution,
+                                     reverse_alt=encoders_profile.alt_reverse,
+                                     reverse_az=encoders_profile.az_reverse)
+            self.encoders.connect(encoders_profile.serial_port,
+                             speed=encoders_profile.serial_speed)
+        else:
+            logging.error(f'Unknown encoder driver {encoder_drv} requested!')
+            self.encoders = None
+            # FIXME Raise exception?
+            return False
+#    if args.simul:
+#        encoders = EncodersAltAzSimulated(res_alt=profile.encoders.alt_resolution,
+#                             res_az=profile.encoders.az_resolution,
+#                             reverse_alt=profile.encoders.alt_reverse,
+#                             reverse_az=profile.encoders.az_reverse)
+#    else:
+
+
+        logging.info(f'Connected to encoders on port {encoders_profile.serial_port}')
+        return True
 
     # handle device specific actions or pass to base
     def get_action_handler(self, action):
@@ -240,18 +315,86 @@ class AltAzSettingCircles(AlpacaBaseDevice):
 
         return resp
 
+    # handle device specific setup
+    def get_device_setup_handler(self):
+        """
+        Handle get setup requests.
+
+        :param setup: Setup URI.
+        :type setup: str
+
+        :returns:
+          (dict) For requested setup return dict with:
+
+                'Value': return value for get request
+                'ErrorNumber': error result for request
+                'ErrorString': string corresponding to error number
+        """
+        return f"""
+    <html>
+      <head>
+        <title>Alt/Az Setting Circles Driver Setup</title>
+        <style>
+          td {{
+             padding:0 15px;
+          }}
+        </style>
+      </head>
+      <body>
+        <h1>Alt/Az Setting Circles Driver Setup</h1>
+        <h2>Driver Info</h2>
+        <table>
+          <tr><td>Driver Name</td><td>{self.device.name}</td></tr>
+          <tr><td>Driver Info</td><td>{self.device.driverinfo}</td></tr>
+          <tr><td>Driver Description</td><td>{self.device.description}</td></tr>
+          <tr><td>Driver Version</td><td>{self.device.driver_version}</td></tr>
+        </table>
+        <h2>Device Configuration</h2>
+          <h3>Location</h3>
+          <table>
+            <tr><td>Name</td></tr><td>self.
+      </body>
+    </html>
+               """
     def connect(self):
         """
         Attempts to connect to device
         """
         logging.debug('TestTelescopeDevice:connect() called')
+
+        # load operating profile
+        if not self.load_profile():
+            logging.error('Unable to load profile - cannot connect!')
+            # FIXME Raise exception?
+            return False
+
+        # load encoders
+        if not self.load_encoders(self.profile.encoders):
+            logging.error('Unable to load encoders driver - cannot connect!')
+            # FIXME Raise exception?
+            return False
+
         self.connected = True
+
+        print('self.encoders = ', self.encoders)
+        return True
 
     def disconnect(self):
         """
         Disconnects from device
         """
-        logging.debug('TestTelescopeDevice:disconnect() called')
+        logging.info('TestTelescopeDevice:disconnect() called')
+
+        if not self.connected:
+            logging.error('disconnect called but not connected!')
+            return False
+
+        # disconnect from encoders
+        self.encoders.disconnect()
+
+        # clear out profile
+        self.profile = None
+
         self.connected = False
 
     def convert_encoder_position_to_altaz(self, enc_alt, enc_az):
