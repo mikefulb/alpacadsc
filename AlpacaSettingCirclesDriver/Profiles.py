@@ -177,6 +177,7 @@ class ProfileSection(object):
             val = default
         return val
 
+
     def __repr__(self):
         """
         Returns string representation of ProfileSection

@@ -132,6 +132,12 @@ class AlpacaDeviceServer(Thread):
                               methods=['GET'],
                               view_func=self.EndpointHandler(self, self.device.get_device_setup_handler, 'GET'))
 
+        self.app.add_url_rule('/setup' + _alpaca_url_base + '/setup',
+                              'POST_DEVICE_SETUP',
+                              methods=['POST'],
+                              view_func=self.device.post_device_setup_handler)
+
+
         self.server_transaction_id = 0
 
         # die if main dies

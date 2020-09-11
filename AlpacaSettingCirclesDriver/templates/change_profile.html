@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <title>Alt/Az Setting Circles Driver Setup</title>
+    <style>
+      td {
+        padding:0 15px;
+      }
+
+      body {
+        background-color: #c0c0ca;
+        color: #000000;
+      }
+      .hilight {
+        display: inline-block;
+        padding: 2px;
+        background-color: #b0b0c0;
+      }
+      table {
+        background-color: #d0d0c0;
+      }
+
+      /* other style stuff not involving colors */
+      * {
+          font-family: Arial;
+          /*font-size: 97%;*/
+          /*font-size: 14px;*/
+        }
+    </style>
+  </head>
+  <body>
+    <h1>Alt/Az Setting Circles Driver Setup</h1>
+    <h2>Change Profile</h2>
+    <p>Select the new profile from the options below:</p>
+
+    {% for p in profiles %}
+        {{p}}
+    {% endfor %}
+
+  </body>
+</html>

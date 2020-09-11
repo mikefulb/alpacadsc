@@ -1,14 +1,33 @@
-<html>
-  <head>
-    <title>Alt/Az Setting Circles Driver Setup</title>
+{% block header %}
+    <h1>{% block title %} Alt/Az Setting Circles Driver Setup{% endblock %}</h1>
     <style>
       td {
-         padding:0 15px;
+        padding:0 15px;
       }
+
+      body {
+        background-color: #c0c0ca;
+        color: #000000;
+      }
+      .hilight {
+        display: inline-block;
+        padding: 2px;
+        background-color: #b0b0c0;
+      }
+      table {
+        background-color: #d0d0c0;
+      }
+
+      /* other style stuff not involving colors */
+      * {
+          font-family: Arial;
+          /*font-size: 97%;*/
+          /*font-size: 14px;*/
+        }
     </style>
-  </head>
-  <body>
-    <h1>Alt/Az Setting Circles Driver Setup</h1>
+{% endblock %}
+
+{% block content %}
     <h2>Driver Info</h2>
     <table>
       <tr><td>Driver Name</td><td>{{driver.drivername}}</td></tr>
@@ -26,32 +45,203 @@
         <p><b>Since driver is CONNECTED configuration cannot be changed.</b>
         <p><b>Disconnect all clients from driver and reload this page.</b>
 
+       <h2>Current Profile: {{dprofile_name}}</h2>
+
+        <h3>Location</h3>
+        <table>
+          <tr><td>Name</td><td>{{dprofile.location.obsname}}</td></tr>
+          <tr><td>Latitude</td><td>{{profile.location.latitude}}</td></tr>
+          <tr><td>Longitude</td><td>{{profile.location.longitude}}</td></tr>
+          <tr><td>Altitude</td><td>{{profile.location.altitude}}</td></tr>
+        </table>
+
+        <h3>Encoders</h3>
+        <table>
+          <tr><td>Driver</td><td>{{profile.encoders.driver}}</td></tr>
+          <tr><td>Serial Port</td><td>{{profile.encoders.serial_port}}</td></tr>
+          <tr><td>Serial Speed</td><td>{{profile.encoders.serial_speed}}</td></tr>
+          <tr><td>Altitude Resolution</td><td>{{profile.encoders.alt_resolution}}</td></tr>
+          <tr><td>Azimuth Resolution</td><td>{{profile.encoders.az_resolution}}</td></tr>
+          <tr><td>Altitude Reversed?</td><td>{{profile.encoders.alt_reverse}}</td></tr>
+          <tr><td>Azimuth Reversed?</td><td>{{profile.encoders.az_reverse}}</td></tr>
+        </table>
+
     {% else %}
 
         <table><tr><td>Connection Status</td><td>DISCONNECTED</td></tr></table>
 
+        <h2>Current Profile: {{profile_name}}</h2>
+
+        <form>
+          <button formaction="changeprofile">Change Profile</button>
+        </form>
+
+        <form action="setup" method="POST">
+          <input type="hidden" name="form_id" value="new_profile_form">
+          <table>
+            <tr>
+              <td>
+                <label for="new_profile_id">New Profile Name</label>
+              </td>
+              <td>
+                <input type="text" name="new_profile_id" value="">
+              </td>
+              <td>
+                <input type="submit" value="Create New Profile">
+              </td>
+            </tr>
+          </table>
+        </form>
+
+        <h3>Location</h3>
+        <form action="setup" method="POST">
+        <input type="hidden" name="form_id" value="location_modify_form">
+        <input type="hidden" name="profile_id" value="{{profile_name}}">
+        <table>
+          <tr>
+            <td>
+              <label for="name">Location Name</label>
+            </td>
+            <td>
+              <input type="text" name="name" value="{{profile.location.obsname}}">
+            </td>
+            <td>
+              Name of observing location
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="latitude">Latitude</label>
+            </td>
+            <td>
+              <input type="text" name="latitude" value="{{profile.location.latitude}}">
+            </td>
+            <td>
+              Latitude (decimal degrees)
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="longitude">Longitude</label>
+            </td>
+            <td>
+              <input type="text" name="longitude" value="{{profile.location.longitude}}">
+            </td>
+            <td>
+              Longitude (decimal degrees), negative for West
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="altitude">Altitude</label>
+            </td>
+            <td>
+              <input type="text" name="altitude" value="{{profile.location.altitude}}">
+            </td>
+            <td>
+              Altitude (meters)
+            </td>
+          </tr>
+        </table>
+
+        <input type="submit" value="Save Changes">
+        </form>
+
+        <h3>Encoders</h3>
+        <form action="setup" method="POST">
+        <input type="hidden" name="form_id" value="encoder_modify_form">
+        <input type="hidden" name="profile_id" value="{{profile_name}}">
+        <table>
+          <tr>
+            <td>
+              <label for="encoder_driver">Driver</label>
+            </td>
+            <td>
+              <input type="text" name="encoder_driver" value="{{profile.encoders.driver}}">
+            </td>
+            <td>
+              Available drivers: DaveEk
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="serial_port">Serial Port</label>
+            </td>
+            <td>
+              <input type="text" name="serial_port" value="{{profile.encoders.serial_port}}">
+            </td>
+            <td>
+              COMn: on Windows or /dev/ttyUSBn or /dev/ttyACMn on Linux
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="serial_speed">=Serial Speed</label>
+            </td>
+            <td>
+              <input type="text" name="serial_speed" value ="{{profile.encoders.serial_speed}}">
+            </td>
+            <td>
+              Typically 9600
+          </tr>
+          <tr>
+            <td>
+              <label for="alt_resolution">Altitude Resolution</label>
+            </td>
+            <td>
+              <input type="text" name="alt_resolution" value="{{profile.encoders.alt_resolution}}">
+            </td>
+            <td>
+              Usually 4000, 8000 or 10000
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="az_resolution">Azimuth Resolution</label>
+            </td>
+            <td>
+              <input type="text" name="az_resolution" value="{{profile.encoders.az_resolution}}">
+            </td>
+            <td>
+              Usually 4000, 8000 or 10000
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="alt_reversed">Altitude Reversed?</label>
+            </td>
+            <td>
+              {% if profile.encoders.alt_reverse %}
+                 {% set checkstr = 'checked' %}
+              {% else %}
+                 {% set checkstr = '' %}
+              {% endif %}
+              <input type="checkbox" name="alt_reverse" {{checkstr}}>
+            </td>
+            <td>
+              Enable if scope moves opposite direction in ALT
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="az_reversed">Azimuth Reversed?</label>
+            </td>
+            <td>
+              {% if profile.encoders.az_reverse %}
+                 {% set checkstr = 'checked' %}
+              {% else %}
+                 {% set checkstr = '' %}
+              {% endif %}
+              <input type="checkbox" name="az_reverse" {{checkstr}}>
+            </td>
+            <td>
+              Enable f scope moves opposite direction in AZ
+            </td>
+          </tr>
+        </table>
+
+        <input type="submit" value="Save Changes">
+        </form>
     {% endif %}
+{% endblock %}
 
-    <h2>Profile: {{driver.profile_name}}</h2>
-
-
-    <h3>Location</h3>
-    <table>
-      <tr><td>Name</td><td>{{driver.profile.location.obsname}}</td></tr>
-      <tr><td>Latitude</td><td>{{driver.profile.location.latitude}}</td></tr>
-      <tr><td>Longitude</td><td>{{driver.profile.location.longitude}}</td></tr>
-      <tr><td>Altitude</td><td>{{driver.profile.location.altitude}}</td></tr>
-    </table>
-
-    <h3>Encoders</h3>
-    <table>
-      <tr><td>Driver</td><td>{{driver.profile.encoders.driver}}</td></tr>
-      <tr><td>Serial Port</td><td>{{driver.profile.encoders.serial_port}}</td></tr>
-      <tr><td>Serial Speed</td><td>{{driver.profile.encoders.serial_speed}}</td></tr>
-      <tr><td>Altitude Resolution</td><td>{{driver.profile.encoders.alt_resolution}}</td></tr>
-      <tr><td>Azimuth Resolution</td><td>{{driver.profile.encoders.az_resolution}}</td></tr>
-      <tr><td>Altitude Reversed?</td><td>{{driver.profile.encoders.alt_reverse}}</td></tr>
-      <tr><td>Azimuth Reversed?</td><td>{{driver.profile.encoders.az_reverse}}</td></tr>
-    </table>
-  </body>
-</html>
