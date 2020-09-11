@@ -36,8 +36,6 @@
       <tr><td>Driver Version</td><td>{{driver.driver_version}}</td></tr>
     </table>
 
-    <h2>Device Configuration</h2>
-
     {% if driver.connected %}
 
         <table><tr><td>Connection Status</td><td>CONNECTED</td></tr></table>
@@ -144,7 +142,7 @@
             </td>
           </tr>
         </table>
-
+        <br>
         <input type="submit" value="Save Changes">
         </form>
 
@@ -240,7 +238,7 @@
             </td>
           </tr>
         </table>
-
+        <br>
         <input type="submit" value="Save Changes">
         </form>
     {% endif %}
