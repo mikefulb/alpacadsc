@@ -16,7 +16,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+import os
 import sys
 import logging
 from astropy.coordinates import EarthLocation, AltAz, SkyCoord
@@ -192,6 +192,165 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         logging.info(f'Connected to encoders on port {encoders_profile.serial_port}')
         return True
 
+    # handle device specific actions or pass to base
+    def get_action_handler(self, action):
+        """
+        Handle get actions.
+
+        :param action: Action URI.
+        :type action: str
+
+        :returns:
+          (dict) For requested action return dict with:
+
+                'Value': return value for get request
+                'ErrorNumber': error result for request
+                'ErrorString': string corresponding to error number
+        """
+        #logging.debug(f'TestTelescopeDevice::get_action_handler(): action = {action}')
+        resp = {}
+        resp['ErrorNumber'] = 0
+        resp['ErrorString'] = ''
+
+        if action in ['alignmentmode', 'altitude', 'aperturearea',
+                      'aperturediameter', 'athome',  'atpark',  'azimuth',
+                      'canfindhome', 'canpark', 'canpulseguide',
+                      'cansetdeclinationrate', 'cansetguiderates', 'cansetpark',
+                      'cansetpierside', 'cansetrightascensionrate',
+                      'cansettracking', 'canslew', 'canslewaltaz',
+                      'canslewaltazasync', 'canslewasync', 'cansync',
+                      'cansyncaltaz', 'doesrefraction',
+                      'equatorialsystem', 'focallength',
+                      'guideratedeclination', 'guideraterightascension',
+                      'ispulseguiding', 'sideofpier',
+                      'sideraltime', 'siteelavation', 'sitelatitude',
+                      'sitelongitude', 'slewing', 'slewsettletime',
+                      'targetdeclination', 'targetrightascension',
+                      'tracking', 'trackingrate', 'trackingrates', 'utcdate',
+                      'axisrates', 'canmoveaxis', 'destinationsideofpier']:
+            #try:
+            resp['Value'] = getattr(self, action)
+
+                #resp['ErrorNumber'] = ALPACA_ERROR_NOTIMPLEMENTED
+        elif action in ['rightascension', 'declination']:
+            radec = self.get_current_radec()
+            if radec is not None:
+                if action == 'rightascension':
+                    resp['Value'] = radec.ra.hour
+                elif action == 'declination':
+                    resp['Value'] = radec.dec.degree
+            else:
+                resp['Value'] = 0
+        else:
+            # try with any registered handlers
+            base_resp = super().get_action_handler(action)
+            resp['Value'] = base_resp['Value']
+            resp['ErrorNumber'] = base_resp['ErrorNumber']
+            #resp['ErrorNumber'] = ALPACA_ERROR_NOTIMPLEMENTED
+
+        # fill in error string if required
+        if resp['ErrorNumber'] != 0:
+            resp['ErrorString'] = ALPACA_ERROR_STRINGS[resp['ErrorNumber']]
+        else:
+            logging.debug(f'return value for {action} = {resp["Value"]}')
+
+        return resp
+
+    def put_action_handler(self, action, forms):
+        """
+        Handle put actions.
+
+        :param action: Action URI.
+        :type action: str
+        :param forms: Data for put action
+
+        :returns:
+          (dict) For requested action return dict with:
+
+                'Value': return value for get request
+                'ErrorNumber': error result for request
+                'ErrorString': string corresponding to error number
+        """
+        #logging.debug(f'TestTelescopeDevice::put_action_handler(): action = {action}')
+        resp = {}
+        resp['ErrorNumber'] = 0
+        resp['ErrorString'] = ''
+
+        if action in ['declinationrate', 'doesrefraction',
+                      'guideratedeclinatoin', 'guideraterightascension',
+                      'rightascensionrate', 'sideofpier', 'slewsettletime',
+                      'targetdeclination', 'targetrightascension',
+                      'tracking', 'trackingrate', 'abortslew',
+                      'findhome', 'moveaxis', 'park', 'pulseguide',
+                      'setpark', 'slewtoaltaz', 'slewtoaltazasync',
+                      'slewtocoordinates', 'slewtocoordinatesasync',
+                      'slewtotarget', 'slewtotargetasync', 'synctotarget',
+                      'unpark']:
+            logging.error(f'Unimplemented telescope method {action} requested!')
+            resp['ErrorNumber'] = ALPACA_ERROR_NOTIMPLEMENTED
+        elif action == 'synctoaltaz':
+            logging.error(f'Need to handle {action}!')
+            resp['ErrorNumber'] = 0
+        elif action == 'synctocoordinates':
+            #logging.error(f'Need to handle {action}!')
+            # RA in decimal hours
+            sync_ra = float(forms['RightAscension'])
+            # DEC in decimal degrees
+            sync_dec = float(forms['Declination'])
+            logging.debug(f'synctocoordinates: ra={sync_ra} dec={sync_dec}')
+            rc = self.sync_to_coordinates(sync_ra, sync_dec)
+            resp['ErrorNumber'] = rc
+        elif action == 'siteelevation':
+            logging.error(f'Need to handle {action}!')
+            resp['ErrorNumber'] = 0
+        elif action == 'sitelatitude':
+            logging.error(f'Need to handle {action}!')
+            resp['ErrorNumber'] = 0
+        elif action == 'sitelongitude':
+            logging.error(f'Need to handle {action}!')
+            resp['ErrorNumber'] = 0
+        elif action == 'utcdate':
+            logging.error(f'Need to handle {action}!')
+            resp['ErrorNumber'] = 0
+        else:
+            # try with any registered handlers
+            base_resp = super().put_action_handler(action, forms)
+            resp['ErrorNumber'] = base_resp['ErrorNumber']
+
+        # fill in error string if required
+        if resp['ErrorNumber'] != 0:
+            resp['ErrorString'] = ALPACA_ERROR_STRINGS[resp['ErrorNumber']]
+
+        return resp
+
+    # handle device specific setup
+    def get_device_setup_handler(self):
+        """
+        Handle get setup requests.
+
+        :param setup: Setup URI.
+        :type setup: str
+
+        :returns:
+          (dict) For requested setup return dict with:
+
+                'Value': return value for get request
+                'ErrorNumber': error result for request
+                'ErrorString': string corresponding to error number
+        """
+
+        # determine if driver is connected or not
+        if not self.connected:
+            # load current profile for purposes of editting
+            profile, profile_name = self.load_profile()
+
+        output = render_template('device_setup_base.html', driver=self,
+                                 profile=profile,
+                                 profile_name=profile_name,
+                                 profile_list=find_profiles(PROFILE_BASENAME))
+
+        return output
+
     def post_device_setup_handler(self):
         logging.info(f'post_device_setup_handler request.form={request.form}')
 
@@ -199,7 +358,28 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         form_id = request.form.get('form_id')
         logging.info(f'form_id = {form_id}')
 
-        # handle new profile request first
+        # handle selection of new current profile
+        if form_id == 'selected_profile_form':
+            new_profile = request.form.get('profile_choice')
+            set_current_profile(PROFILE_BASENAME, new_profile)
+            return render_template('modify_profile.html',
+                                   body_html=f'The profile {new_profile} is now '
+                                   'the current profile.<br><p><a href="setup">'
+                                   'Return to setup page</a>')
+
+        # handle change current profile request
+        if form_id == 'change_profile_form':
+            raw_profile_list=find_profiles(PROFILE_BASENAME)
+            profile_list = []
+            for p in raw_profile_list:
+                base = os.path.basename(p)
+                fname, ext = os.path.splitext(base)
+                profile_list.append(fname)
+            return render_template('change_profile.html',
+                                   current_profile=get_current_profile(PROFILE_BASENAME),
+                                   profile_list=profile_list)
+
+        # handle new profile request
         if form_id == 'new_profile_form':
             new_profile_id = request.form.get('new_profile_id')
             if new_profile_id is None or len(new_profile_id) < 1:
@@ -398,164 +578,6 @@ class AltAzSettingCircles(AlpacaBaseDevice):
                                body_html = f'Profile {profile_id} updated.<br> '
                                            f'<p><a href="setup">'
                                            f'Return to setup page</a>')
-
-    # handle device specific actions or pass to base
-    def get_action_handler(self, action):
-        """
-        Handle get actions.
-
-        :param action: Action URI.
-        :type action: str
-
-        :returns:
-          (dict) For requested action return dict with:
-
-                'Value': return value for get request
-                'ErrorNumber': error result for request
-                'ErrorString': string corresponding to error number
-        """
-        #logging.debug(f'TestTelescopeDevice::get_action_handler(): action = {action}')
-        resp = {}
-        resp['ErrorNumber'] = 0
-        resp['ErrorString'] = ''
-
-        if action in ['alignmentmode', 'altitude', 'aperturearea',
-                      'aperturediameter', 'athome',  'atpark',  'azimuth',
-                      'canfindhome', 'canpark', 'canpulseguide',
-                      'cansetdeclinationrate', 'cansetguiderates', 'cansetpark',
-                      'cansetpierside', 'cansetrightascensionrate',
-                      'cansettracking', 'canslew', 'canslewaltaz',
-                      'canslewaltazasync', 'canslewasync', 'cansync',
-                      'cansyncaltaz', 'doesrefraction',
-                      'equatorialsystem', 'focallength',
-                      'guideratedeclination', 'guideraterightascension',
-                      'ispulseguiding', 'sideofpier',
-                      'sideraltime', 'siteelavation', 'sitelatitude',
-                      'sitelongitude', 'slewing', 'slewsettletime',
-                      'targetdeclination', 'targetrightascension',
-                      'tracking', 'trackingrate', 'trackingrates', 'utcdate',
-                      'axisrates', 'canmoveaxis', 'destinationsideofpier']:
-            #try:
-            resp['Value'] = getattr(self, action)
-
-                #resp['ErrorNumber'] = ALPACA_ERROR_NOTIMPLEMENTED
-        elif action in ['rightascension', 'declination']:
-            radec = self.get_current_radec()
-            if radec is not None:
-                if action == 'rightascension':
-                    resp['Value'] = radec.ra.hour
-                elif action == 'declination':
-                    resp['Value'] = radec.dec.degree
-            else:
-                resp['Value'] = 0
-        else:
-            # try with any registered handlers
-            base_resp = super().get_action_handler(action)
-            resp['Value'] = base_resp['Value']
-            resp['ErrorNumber'] = base_resp['ErrorNumber']
-            #resp['ErrorNumber'] = ALPACA_ERROR_NOTIMPLEMENTED
-
-        # fill in error string if required
-        if resp['ErrorNumber'] != 0:
-            resp['ErrorString'] = ALPACA_ERROR_STRINGS[resp['ErrorNumber']]
-        else:
-            logging.debug(f'return value for {action} = {resp["Value"]}')
-
-        return resp
-
-    def put_action_handler(self, action, forms):
-        """
-        Handle put actions.
-
-        :param action: Action URI.
-        :type action: str
-        :param forms: Data for put action
-
-        :returns:
-          (dict) For requested action return dict with:
-
-                'Value': return value for get request
-                'ErrorNumber': error result for request
-                'ErrorString': string corresponding to error number
-        """
-        #logging.debug(f'TestTelescopeDevice::put_action_handler(): action = {action}')
-        resp = {}
-        resp['ErrorNumber'] = 0
-        resp['ErrorString'] = ''
-
-        if action in ['declinationrate', 'doesrefraction',
-                      'guideratedeclinatoin', 'guideraterightascension',
-                      'rightascensionrate', 'sideofpier', 'slewsettletime',
-                      'targetdeclination', 'targetrightascension',
-                      'tracking', 'trackingrate', 'abortslew',
-                      'findhome', 'moveaxis', 'park', 'pulseguide',
-                      'setpark', 'slewtoaltaz', 'slewtoaltazasync',
-                      'slewtocoordinates', 'slewtocoordinatesasync',
-                      'slewtotarget', 'slewtotargetasync', 'synctotarget',
-                      'unpark']:
-            logging.error(f'Unimplemented telescope method {action} requested!')
-            resp['ErrorNumber'] = ALPACA_ERROR_NOTIMPLEMENTED
-        elif action == 'synctoaltaz':
-            logging.error(f'Need to handle {action}!')
-            resp['ErrorNumber'] = 0
-        elif action == 'synctocoordinates':
-            #logging.error(f'Need to handle {action}!')
-            # RA in decimal hours
-            sync_ra = float(forms['RightAscension'])
-            # DEC in decimal degrees
-            sync_dec = float(forms['Declination'])
-            logging.debug(f'synctocoordinates: ra={sync_ra} dec={sync_dec}')
-            rc = self.sync_to_coordinates(sync_ra, sync_dec)
-            resp['ErrorNumber'] = rc
-        elif action == 'siteelevation':
-            logging.error(f'Need to handle {action}!')
-            resp['ErrorNumber'] = 0
-        elif action == 'sitelatitude':
-            logging.error(f'Need to handle {action}!')
-            resp['ErrorNumber'] = 0
-        elif action == 'sitelongitude':
-            logging.error(f'Need to handle {action}!')
-            resp['ErrorNumber'] = 0
-        elif action == 'utcdate':
-            logging.error(f'Need to handle {action}!')
-            resp['ErrorNumber'] = 0
-        else:
-            # try with any registered handlers
-            base_resp = super().put_action_handler(action, forms)
-            resp['ErrorNumber'] = base_resp['ErrorNumber']
-
-        # fill in error string if required
-        if resp['ErrorNumber'] != 0:
-            resp['ErrorString'] = ALPACA_ERROR_STRINGS[resp['ErrorNumber']]
-
-        return resp
-
-    # handle device specific setup
-    def get_device_setup_handler(self):
-        """
-        Handle get setup requests.
-
-        :param setup: Setup URI.
-        :type setup: str
-
-        :returns:
-          (dict) For requested setup return dict with:
-
-                'Value': return value for get request
-                'ErrorNumber': error result for request
-                'ErrorString': string corresponding to error number
-        """
-
-        # determine if driver is connected or not
-        if not self.connected:
-            # load current profile for purposes of editting
-            profile, profile_name = self.load_profile()
-
-        output = render_template('device_setup_base.html', driver=self,
-                                 profile=profile, profile_name=profile_name)
-
-        return output
-
     # FIXME connect/disconnect does not distiguish between clients - is this
     #       even addressed by the Alpaca standard?  Need to investigate.
     def connect(self):

@@ -72,8 +72,9 @@
 
         <h2>Current Profile: {{profile_name}}</h2>
 
-        <form>
-          <button formaction="changeprofile">Change Profile</button>
+        <form action="setup" method="POST">
+          <input type="hidden" name="form_id" value="change_profile_form">
+          <input type="submit" value="Change Profile">
         </form>
 
         <form action="setup" method="POST">

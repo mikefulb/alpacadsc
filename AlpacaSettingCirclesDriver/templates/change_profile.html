@@ -32,9 +32,28 @@
     <h2>Change Profile</h2>
     <p>Select the new profile from the options below:</p>
 
-    {% for p in profiles %}
-        {{p}}
-    {% endfor %}
+    <form action="setup" method="POST">
+        <input type="hidden" name="form_id" value="selected_profile_form">
+        <table>
+        {% for p in profile_list %}
+          {{p}} {{current_profile}}<br>
+          {% if p == current_profile %}
+            {% set checked='checked' %}
+          {% else %}
+            {% set checked='' %}
+          {% endif %}
+           <tr>
+             <td>
+               <input type="radio" id="{{p}}" name="profile_choice" value="{{p}}" {{checked}}>
+             </td>
+             <td>
+               <label for="{{p}}">{{p}}</label>
+             </td>
+           </tr>
+        {% endfor %}
+        </table>
+        <input type="submit" value="Create New Profile">
+    </form>
 
   </body>
 </html>
