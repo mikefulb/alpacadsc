@@ -78,22 +78,15 @@ setup(
     #
     # For a list of valid classifiers, see https://pypi.org/classifiers/
     classifiers=[  # Optional
-        # How mature is this project? Common values are
-        #   3 - Alpha
-        #   4 - Beta
-        #   5 - Production/Stable
         'Development Status :: 5 - Production/Stable',
 
-        # Indicate who your project is intended for
         'Intended Audience :: End Users/Desktop',
         'Topic :: Scientific/Engineering :: Astronomy',
 
-        # Pick your license as you wish
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: GNU General Public License (GPL)',
 
-        # Specify the Python versions you support here. In particular, ensure
-        # that you indicate you support Python 3. These classifiers are *not*
-        # checked by 'pip install'. See instead 'python_requires' below.
+        'Operating System :: OS Independent',
+
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
@@ -110,7 +103,7 @@ setup(
 
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
-    package_dir={'': 'AlpacaSettingCirclesDriver'},  # Optional
+    package_dir={},  # Optional
 
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
@@ -121,7 +114,7 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=find_packages(where='AlpacaSettingCirclesDriver'),  # Required
+    packages=find_packages(),  # Required
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
@@ -167,8 +160,8 @@ setup(
     # For example, the following would provide a command called `sample` which
     # executes the function `main` from this package when invoked:
     entry_points={  # Optional
-        'scripts': [
-            'AlpacaSettingCircleDriver=AlpacaSettingCircleDriver_main:main',
+        'console_scripts': [
+            'AlpacaSettingCircleDriver = StartService:main',
         ],
     },
 
@@ -182,10 +175,10 @@ setup(
     # maintainers, and where to support the project financially. The key is
     # what's used to render the link text on PyPI.
     project_urls={  # Optional
-        'Bug Reports': 'https://github.com/pypa/sampleproject/issues',
-        'Funding': 'https://donate.pypi.org',
-        'Say Thanks!': 'http://saythanks.io/to/example',
-        'Source': 'https://github.com/pypa/sampleproject/',
+#        'Bug Reports': 'https://github.com/pypa/sampleproject/issues',
+#        'Funding': 'https://donate.pypi.org',
+#        'Say Thanks!': 'http://saythanks.io/to/example',
+#        'Source': 'https://github.com/pypa/sampleproject/',
     },
 )
 

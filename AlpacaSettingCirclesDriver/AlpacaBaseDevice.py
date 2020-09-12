@@ -16,6 +16,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 import logging
 
 # error codes from https://ascom-standards.org/Help/Developer/html/T_ASCOM_ErrorCodes.htm
