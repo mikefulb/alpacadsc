@@ -128,6 +128,8 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             logging.error('Must specify a valid profile')
             sys.exit(1)
 
+        logging.info(f'load_profile: try_profile = {try_profile}')
+
         profile = Profile(PROFILE_BASENAME, try_profile + '.yaml')
         profile.read()
 
@@ -135,6 +137,7 @@ class AltAzSettingCircles(AlpacaBaseDevice):
 
     def load_current_profile(self):
         profile, profile_name = self.load_profile()
+        logging.info(f'load_current_profile: {profile} {profile_name}')
 
         self.profile = profile
         self.profile_name = profile_name
@@ -147,6 +150,8 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         self.earth_location = EarthLocation(lat=self.profile.location.latitude,
                                             lon=self.profile.location.longitude,
                                             height=self.profile.location.altitude*u.m)
+
+        return True
 
     def unload_current_profile(self):
         self.profile = None
@@ -213,8 +218,8 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         resp['ErrorNumber'] = 0
         resp['ErrorString'] = ''
 
-        if action in ['alignmentmode', 'altitude', 'aperturearea',
-                      'aperturediameter', 'athome',  'atpark',  'azimuth',
+        if action in ['alignmentmode', 'aperturearea', #'altitude',
+                      'aperturediameter', 'athome',  'atpark', # 'azimuth',
                       'canfindhome', 'canpark', 'canpulseguide',
                       'cansetdeclinationrate', 'cansetguiderates', 'cansetpark',
                       'cansetpierside', 'cansetrightascensionrate',
@@ -233,6 +238,16 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             resp['Value'] = getattr(self, action)
 
                 #resp['ErrorNumber'] = ALPACA_ERROR_NOTIMPLEMENTED
+        elif action in ['altitude', 'azimuth']:
+            altaz = self.get_current_altaz()
+            if altaz is not None:
+                cur_alt, cur_az = altaz
+                if action == 'altitude':
+                    resp['Value'] = cur_alt
+                elif action == 'azimuth':
+                    resp['Value'] = cur_az
+            else:
+                resp['Value'] = 0
         elif action in ['rightascension', 'declination']:
             radec = self.get_current_radec()
             if radec is not None:
@@ -344,6 +359,9 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         if not self.connected:
             # load current profile for purposes of editting
             profile, profile_name = self.load_profile()
+        else:
+            profile = self.profile
+            profile_name = self.profile_name
 
         output = render_template('device_setup_base.html', driver=self,
                                  profile=profile,
@@ -677,6 +695,36 @@ class AltAzSettingCircles(AlpacaBaseDevice):
 
         return cur_alt, cur_az
 
+    def get_current_altaz(self):
+        """
+        Returns current RA/ALT/AZ of where device is pointing.
+
+        *note* Driver must be synchronized or value will be meaningless.
+
+        :returns:
+            (float, float) RA/DEC position or None if device is
+                           not synchronized yet
+        """
+        if None in [self.enc_alt0, self.enc_az0, self.syncpos_alt, self.syncpos_az]:
+            logging.error('get_current_altaz: No transformation setup!')
+            return None
+
+        # get encoders
+        enc_pos = self.encoders.get_encoder_position()
+        if enc_pos is None:
+            logging.error('get_current_altaz: Unable to read encoder position!')
+            return None
+
+        enc_alt, enc_az = enc_pos
+
+        skyaltaz = self.convert_encoder_position_to_altaz(enc_alt, enc_az)
+
+        if skyaltaz is None:
+            logging.error('get_current_altaz: Unable to convert encoder position!')
+            return None
+
+        return skyaltaz
+
     def get_current_radec(self):
         """
         Returns current RA/DEC of where device is pointing.
@@ -687,19 +735,15 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             (float, float) RA/DEC position or None if device is
                            not synchronized yet
         """
-        if None in [self.enc_alt0, self.enc_az0, self.syncpos_alt, self.syncpos_az]:
-            logging.error('get_current_radec: No transformation setup!')
+
+        altaz = self.get_current_altaz()
+        if not altaz:
+            logging.error('get_current_radec: Unable to get alt/az position!')
             return None
 
-        # get encoders
-        enc_pos = self.encoders.get_encoder_position()
-        if enc_pos is None:
-            return -1
+        sky_alt, sky_az = altaz
 
-        enc_alt, enc_az = enc_pos
-
-        sky_alt, sky_az = self.convert_encoder_position_to_altaz(enc_alt, enc_az)
-
+        # create SkyCoord and convert to RA/DEC
         obs_time = Time.now()
 
         newaltaz = SkyCoord(alt=sky_alt*u.deg, az=sky_az*u.deg, obstime=obs_time,

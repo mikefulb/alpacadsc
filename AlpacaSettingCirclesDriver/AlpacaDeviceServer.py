@@ -182,6 +182,8 @@ class AlpacaDeviceServer(Thread):
           <tr><td>Driver Description</td><td>{self.device.description}</td></tr>
           <tr><td>Driver Version</td><td>{self.device.driver_version}</td></tr>
         </table>
+        <br>
+        Device specific setup is available <a href=setup/v1/telescope/0/setup>here</a>.
       </body>
     </html>
                """
