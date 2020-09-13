@@ -30,30 +30,36 @@
   <body>
     <h1>Alt/Az Setting Circles Driver Setup</h1>
     <h2>Change Profile</h2>
-    <p>Select the new profile from the options below:</p>
 
-    <form action="setup" method="POST">
-        <input type="hidden" name="form_id" value="selected_profile_form">
-        <table>
-        {% for p in profile_list %}
-          {{p}} {{current_profile}}<br>
-          {% if p == current_profile %}
-            {% set checked='checked' %}
-          {% else %}
-            {% set checked='' %}
-          {% endif %}
-           <tr>
-             <td>
-               <input type="radio" id="{{p}}" name="profile_choice" value="{{p}}" {{checked}}>
-             </td>
-             <td>
-               <label for="{{p}}">{{p}}</label>
-             </td>
-           </tr>
-        {% endfor %}
-        </table>
-        <input type="submit" value="Change Profile">
-    </form>
+    {% if profile_list|length < 1 %}
+      There are no defined profiles.  Return to the previous page and
+      create a new profile.
+    {% else %}
+        <p>Select the new profile from the options below:</p>
+
+        <form action="setup" method="POST">
+            <input type="hidden" name="form_id" value="selected_profile_form">
+            <table>
+            {% for p in profile_list %}
+              {{p}} {{current_profile}}<br>
+              {% if p == current_profile %}
+                {% set checked='checked' %}
+              {% else %}
+                {% set checked='' %}
+              {% endif %}
+               <tr>
+                 <td>
+                   <input type="radio" id="{{p}}" name="profile_choice" value="{{p}}" {{checked}}>
+                 </td>
+                 <td>
+                   <label for="{{p}}">{{p}}</label>
+                 </td>
+               </tr>
+            {% endfor %}
+            </table>
+            <input type="submit" value="Change Profile">
+        </form>
+    {% endif %}
 
   </body>
 </html>

@@ -126,7 +126,7 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         if try_profile is None:
             # FIXME probably shouldnt exit from init() - return exception?
             logging.error('Must specify a valid profile')
-            sys.exit(1)
+            return None, None
 
         logging.info(f'load_profile: try_profile = {try_profile}')
 
@@ -138,6 +138,10 @@ class AltAzSettingCircles(AlpacaBaseDevice):
     def load_current_profile(self):
         profile, profile_name = self.load_profile()
         logging.info(f'load_current_profile: {profile} {profile_name}')
+
+        if profile is None or profile_name is None:
+            logging.error('load_current_profile: Failed to load profile!')
+            return False
 
         self.profile = profile
         self.profile_name = profile_name
@@ -413,9 +417,10 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             new_profile.write()
             set_current_profile(PROFILE_BASENAME, new_profile_id)
 
-            return Response(f'Profile {new_profile_id} created and set as '
-                            f'current.<br><a href="setup">'
-                            f'Return to setup page</a>', status=200, headers={})
+            return render_template('new_profile.html',
+                                    body_html=f'Profile {new_profile_id} created and set as '
+                                              'current.<br><p><a href="setup">'
+                                              'Return to setup page</a>')
 
         # handle forms modifying an existing profile
 

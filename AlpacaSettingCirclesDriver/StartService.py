@@ -29,6 +29,7 @@ import argparse
 
 from datetime import datetime
 
+from . import __version__ as version
 from .AlpacaDeviceServer import AlpacaDeviceServer
 from .AltAzSettingCircles import AltAzSettingCircles as TelescopeDevice
 
@@ -45,6 +46,8 @@ def parse_command_line():
     return args
 
 def runapp(args):
+
+    logging.info(f'AlpacaSettingCirclesDriver version {version} starting...')
 
     # create alpaca device object
     device = TelescopeDevice(args.profile)

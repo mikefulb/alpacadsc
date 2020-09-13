@@ -8,11 +8,14 @@ here = pathlib.Path(__file__).parent.resolve()
 # Get the long description from the README file
 long_description = (here / 'README.md').read_text(encoding='utf-8')
 
+# get version
+from AlpacaSettingCirclesDriver import __version__ as AlpacaSettingCirclesDriver_Version
+
 setup(
 
     name='AlpacaSettingCirclesDriver',  # Required
 
-    version='0.0.1',  # Required
+    version=AlpacaSettingCirclesDriver_Version,  # Required
 
     description='Digital setting circles support with Alpaca REST API',  # Optional
 

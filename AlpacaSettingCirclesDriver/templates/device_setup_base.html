@@ -68,7 +68,13 @@
 
         <table><tr><td>Connection Status</td><td>DISCONNECTED</td></tr></table>
 
-        <h2>Current Profile: {{profile_name}}</h2>
+        {% if profile_name is none: %}
+        {%    set cur_profile_name = 'No current profile' %}
+        {% else %}
+        {%    set cur_profile_name = profile_name %}
+        {% endif %}
+
+        <h2>Current Profile: {{cur_profile_name}}</h2>
 
         <form action="setup" method="POST">
           <input type="hidden" name="form_id" value="change_profile_form">
@@ -92,155 +98,158 @@
           </table>
         </form>
 
-        <h3>Location</h3>
-        <form action="setup" method="POST">
-        <input type="hidden" name="form_id" value="location_modify_form">
-        <input type="hidden" name="profile_id" value="{{profile_name}}">
-        <table>
-          <tr>
-            <td>
-              <label for="name">Location Name</label>
-            </td>
-            <td>
-              <input type="text" name="name" value="{{profile.location.obsname}}">
-            </td>
-            <td>
-              Name of observing location
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="latitude">Latitude</label>
-            </td>
-            <td>
-              <input type="text" name="latitude" value="{{profile.location.latitude}}">
-            </td>
-            <td>
-              Latitude (decimal degrees)
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="longitude">Longitude</label>
-            </td>
-            <td>
-              <input type="text" name="longitude" value="{{profile.location.longitude}}">
-            </td>
-            <td>
-              Longitude (decimal degrees), negative for West
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="altitude">Altitude</label>
-            </td>
-            <td>
-              <input type="text" name="altitude" value="{{profile.location.altitude}}">
-            </td>
-            <td>
-              Altitude (meters)
-            </td>
-          </tr>
-        </table>
-        <br>
-        <input type="submit" value="Save Changes">
-        </form>
+        {% if profile is not none %}
 
-        <h3>Encoders</h3>
-        <form action="setup" method="POST">
-        <input type="hidden" name="form_id" value="encoder_modify_form">
-        <input type="hidden" name="profile_id" value="{{profile_name}}">
-        <table>
-          <tr>
-            <td>
-              <label for="encoder_driver">Driver</label>
-            </td>
-            <td>
-              <input type="text" name="encoder_driver" value="{{profile.encoders.driver}}">
-            </td>
-            <td>
-              Available drivers: DaveEk
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="serial_port">Serial Port</label>
-            </td>
-            <td>
-              <input type="text" name="serial_port" value="{{profile.encoders.serial_port}}">
-            </td>
-            <td>
-              COMn: on Windows or /dev/ttyUSBn or /dev/ttyACMn on Linux
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="serial_speed">Serial Speed</label>
-            </td>
-            <td>
-              <input type="text" name="serial_speed" value ="{{profile.encoders.serial_speed}}">
-            </td>
-            <td>
-              Typically 9600
-          </tr>
-          <tr>
-            <td>
-              <label for="alt_resolution">Altitude Resolution</label>
-            </td>
-            <td>
-              <input type="text" name="alt_resolution" value="{{profile.encoders.alt_resolution}}">
-            </td>
-            <td>
-              Usually 4000, 8000 or 10000
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="az_resolution">Azimuth Resolution</label>
-            </td>
-            <td>
-              <input type="text" name="az_resolution" value="{{profile.encoders.az_resolution}}">
-            </td>
-            <td>
-              Usually 4000, 8000 or 10000
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="alt_reversed">Altitude Reversed?</label>
-            </td>
-            <td>
-              {% if profile.encoders.alt_reverse %}
-                 {% set checkstr = 'checked' %}
-              {% else %}
-                 {% set checkstr = '' %}
-              {% endif %}
-              <input type="checkbox" name="alt_reverse" {{checkstr}}>
-            </td>
-            <td>
-              Enable if scope moves opposite direction in ALT
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="az_reversed">Azimuth Reversed?</label>
-            </td>
-            <td>
-              {% if profile.encoders.az_reverse %}
-                 {% set checkstr = 'checked' %}
-              {% else %}
-                 {% set checkstr = '' %}
-              {% endif %}
-              <input type="checkbox" name="az_reverse" {{checkstr}}>
-            </td>
-            <td>
-              Enable f scope moves opposite direction in AZ
-            </td>
-          </tr>
-        </table>
-        <br>
-        <input type="submit" value="Save Changes">
-        </form>
+            <h3>Location</h3>
+            <form action="setup" method="POST">
+            <input type="hidden" name="form_id" value="location_modify_form">
+            <input type="hidden" name="profile_id" value="{{profile_name}}">
+            <table>
+              <tr>
+                <td>
+                  <label for="name">Location Name</label>
+                </td>
+                <td>
+                  <input type="text" name="name" value="{{profile.location.obsname}}">
+                </td>
+                <td>
+                  Name of observing location
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="latitude">Latitude</label>
+                </td>
+                <td>
+                  <input type="text" name="latitude" value="{{profile.location.latitude}}">
+                </td>
+                <td>
+                  Latitude (decimal degrees)
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="longitude">Longitude</label>
+                </td>
+                <td>
+                  <input type="text" name="longitude" value="{{profile.location.longitude}}">
+                </td>
+                <td>
+                  Longitude (decimal degrees), negative for West
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="altitude">Altitude</label>
+                </td>
+                <td>
+                  <input type="text" name="altitude" value="{{profile.location.altitude}}">
+                </td>
+                <td>
+                  Altitude (meters)
+                </td>
+              </tr>
+            </table>
+            <br>
+            <input type="submit" value="Save Changes">
+            </form>
+
+            <h3>Encoders</h3>
+            <form action="setup" method="POST">
+            <input type="hidden" name="form_id" value="encoder_modify_form">
+            <input type="hidden" name="profile_id" value="{{profile_name}}">
+            <table>
+              <tr>
+                <td>
+                  <label for="encoder_driver">Driver</label>
+                </td>
+                <td>
+                  <input type="text" name="encoder_driver" value="{{profile.encoders.driver}}">
+                </td>
+                <td>
+                  Available drivers: DaveEk
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="serial_port">Serial Port</label>
+                </td>
+                <td>
+                  <input type="text" name="serial_port" value="{{profile.encoders.serial_port}}">
+                </td>
+                <td>
+                  COMn: on Windows or /dev/ttyUSBn or /dev/ttyACMn on Linux
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="serial_speed">Serial Speed</label>
+                </td>
+                <td>
+                  <input type="text" name="serial_speed" value ="{{profile.encoders.serial_speed}}">
+                </td>
+                <td>
+                  Typically 9600
+              </tr>
+              <tr>
+                <td>
+                  <label for="alt_resolution">Altitude Resolution</label>
+                </td>
+                <td>
+                  <input type="text" name="alt_resolution" value="{{profile.encoders.alt_resolution}}">
+                </td>
+                <td>
+                  Usually 4000, 8000 or 10000
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="az_resolution">Azimuth Resolution</label>
+                </td>
+                <td>
+                  <input type="text" name="az_resolution" value="{{profile.encoders.az_resolution}}">
+                </td>
+                <td>
+                  Usually 4000, 8000 or 10000
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="alt_reversed">Altitude Reversed?</label>
+                </td>
+                <td>
+                  {% if profile.encoders.alt_reverse %}
+                     {% set checkstr = 'checked' %}
+                  {% else %}
+                     {% set checkstr = '' %}
+                  {% endif %}
+                  <input type="checkbox" name="alt_reverse" {{checkstr}}>
+                </td>
+                <td>
+                  Enable if scope moves opposite direction in ALT
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="az_reversed">Azimuth Reversed?</label>
+                </td>
+                <td>
+                  {% if profile.encoders.az_reverse %}
+                     {% set checkstr = 'checked' %}
+                  {% else %}
+                     {% set checkstr = '' %}
+                  {% endif %}
+                  <input type="checkbox" name="az_reverse" {{checkstr}}>
+                </td>
+                <td>
+                  Enable f scope moves opposite direction in AZ
+                </td>
+              </tr>
+            </table>
+            <br>
+            <input type="submit" value="Save Changes">
+            </form>
+        {% endif %}
     {% endif %}
 {% endblock %}
 
