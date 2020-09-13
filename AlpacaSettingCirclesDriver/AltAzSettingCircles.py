@@ -23,13 +23,13 @@ import logging
 from astropy.coordinates import EarthLocation, AltAz, SkyCoord
 from astropy.time import Time
 from astropy import units as u
-from AlpacaBaseDevice import AlpacaBaseDevice
-from AlpacaBaseDevice import ALPACA_ALIGNMENT_ALTAZ
-from AlpacaBaseDevice import ALPACA_ERROR_STRINGS
-from AlpacaBaseDevice import ALPACA_ERROR_NOTIMPLEMENTED
-from Profiles import find_profiles, set_current_profile, get_current_profile
-from AltAzSettingCirclesProfile import AltAzSettingCirclesProfile as Profile
-from EncodersAltAzDaveEk import EncodersAltAzDaveEk
+from .AlpacaBaseDevice import AlpacaBaseDevice
+from .AlpacaBaseDevice import ALPACA_ALIGNMENT_ALTAZ
+from .AlpacaBaseDevice import ALPACA_ERROR_STRINGS
+from .AlpacaBaseDevice import ALPACA_ERROR_NOTIMPLEMENTED
+from .Profiles import find_profiles, set_current_profile, get_current_profile
+from .AltAzSettingCirclesProfile import AltAzSettingCirclesProfile as Profile
+from .EncodersAltAzDaveEk import EncodersAltAzDaveEk
 #from EncodersAltAzSimulator import EncodersAltAzSimulated
 
 from flask import request, render_template, Response

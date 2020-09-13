@@ -21,7 +21,7 @@
 import os
 import sys
 
-sys.path.append('../AlpacaSettingCirclesDriver')
+#sys.path.append('../AlpacaSettingCirclesDriver')
 
 import time
 import logging
@@ -29,8 +29,8 @@ import argparse
 
 from datetime import datetime
 
-from AlpacaDeviceServer import AlpacaDeviceServer
-from AltAzSettingCircles import AltAzSettingCircles as TelescopeDevice
+from .AlpacaDeviceServer import AlpacaDeviceServer
+from .AltAzSettingCircles import AltAzSettingCircles as TelescopeDevice
 
 
 def parse_command_line():

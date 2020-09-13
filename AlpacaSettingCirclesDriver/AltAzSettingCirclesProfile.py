@@ -19,7 +19,7 @@
 #
 from dataclasses import dataclass
 
-from Profiles import Profile, ProfileSection
+from .Profiles import Profile, ProfileSection
 
 class AltAzSettingCirclesProfile(Profile):
 
