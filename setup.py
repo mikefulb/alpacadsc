@@ -59,7 +59,9 @@ setup(
 
     extras_require={}, # Optional
 
-    package_data={'': 'docs/build/html/*'},# Optional
+    package_data={}, #{'': 'docs/build/html/*'},# Optional
+
+    include_package_data = True,
 
     data_files=[],  # Optional
 
