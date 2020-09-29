@@ -62,15 +62,12 @@ def runapp(args):
 
 def main():
     # FIXME assumes tz is set properly in system?
-    log_timestamp = datetime.now()
     logfilename = 'AlpacaSettingCirclesDriver'
-    #logfilename += '-' + log_timestamp.strftime('%Y%m%d%H%M%S')
+    logfilename += '-' + datetime.now().strftime('%Y%m%d%H%M%S')
     logfilename += '.log'
 
-#    FORMAT = '%(asctime)s %(levelname)-8s %(message)s'
-    #LONG_FORMAT = '%(asctime)s.%(msecs)03d [%(filename)20s:%(lineno)3s - %(funcName)20s() ] %(levelname)-8s %(message)s'
-    LONG_FORMAT = '%(asctime)s [%(filename)20s:%(lineno)3s - %(funcName)20s() ] %(levelname)-8s %(message)s'
-    #SHORT_FORMAT = '%(asctime)s.%(msecs)03d %(levelname)-8s %(message)s'
+    LONG_FORMAT = '%(asctime)s [%(filename)20s:%(lineno)3s - ' + \
+                  '%(funcName)20s() ] %(levelname)-8s %(message)s'
     SHORT_FORMAT = '%(asctime)s %(levelname)-8s %(message)s'
     logging.basicConfig(filename=logfilename,
                         filemode='a',
