@@ -209,13 +209,13 @@ class Profile:
         :param reldir: location relative to top of default config location
                  If None then will be relative to current working directory.
         :type reldir: str
-
         :param name: name of profile config file
         :type name: str
 
-        :note:
-        reldir = "hfdfocus/" and name = "C8F7.yaml" would create
+
+        Note: reldir = "hfdfocus/" and name = "C8F7.yaml" would create
         a file  <configbasedir>/hfdfocus/C8F7.yaml
+
 
         """
         self._config_reldir = reldir

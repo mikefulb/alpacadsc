@@ -24,7 +24,7 @@ the Alpaca Digital Setting Circles Driver (hereafter "DSC driver").  This
 specification will cover the user experience as well as address some details
 of the technical implementation.
 
-The digital setting circles (DSC) is a device which interfaces which each moveable
+The digital setting circles (DSC) is a device which interfaces which each movable
 axis of a telescope and tracking change sin position.  The most common use is on
 a dobsonian telescope which has altitude (ALT) and azimuth (AZ) axes.  The ALT
 axis moves from the horizon to straight overhead (the zenith), while the AZ
@@ -50,7 +50,7 @@ The DSC Driver will allow users to:
 - once synchronized the user can get locate objects using the planetarium program
 
 ...................
-Technical Ovewview
+Technical Overview
 ...................
 
 ~~~~~~~~~~~~~~~~~~~
@@ -74,7 +74,7 @@ Assumptions and Dependencies
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The DSC driver uses Python 3.7 and depends on <insert python web framework>
 web framework to implement the REST API server needed for Alpaca.  The *pyserial*
-module is used for commincating with serial devices.
+module is used for communicating with serial devices.
 
 Currently the driver assumes an ALT/AZ arrangement for the telescope.  It would
 be possible to support a RA/DEC arrangement (like a German Equatorial Mount (GEM)),
@@ -162,7 +162,7 @@ Interface to DSC Encoders
 '''''''''''''''''''''''''
 The DSC driver also maintains communication with the encoders of the DSC device. This
 gives the position of the ALT and AZ axes of the telescope.  The DSC is polled
-at regular intervals for its current position and the driver then recomputers
+at regular intervals for its current position and the driver then recomputes
 the sky position that the telescope is currently pointed.  This computation depends
 upon the user first performing a *synchronize* (or *sync*) operation which involves
 pointing the telescope at a known star or sky objects and telling the planetarium
@@ -205,10 +205,10 @@ information:
     * location name
     * latitude (decimal degrees)
     * longitude (decimal degrees)
-    * altiude (meters)
+    * altitude (meters)
 - DSC configuration
     * serial port for DSC
-    * communcation speed
+    * communication speed
     * ALT/AZ encoder resolution
     * Whether ALT and/or AZ direction is reversed
 - equipment information
@@ -235,7 +235,7 @@ page displays the following information:
 - current observational profile
 
 A button exists that will lead to an alternate web page allows configuring the
-observating profile mentioned in the previous section "Observing Profile".  The
+observing profile mentioned in the previous section "Observing Profile".  The
 user can also create a new profile, load an existing profile, or save the
 current profile under a new name.
 
