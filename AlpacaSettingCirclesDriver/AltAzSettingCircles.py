@@ -20,6 +20,7 @@
 import os
 import sys
 import logging
+import serial.tools.list_ports as list_serial_ports
 from astropy.coordinates import EarthLocation, AltAz, SkyCoord
 from astropy.time import Time
 from astropy import units as u
@@ -367,15 +368,32 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             profile = self.profile
             profile_name = self.profile_name
 
+        try:
+            available_ports = sorted([d.device for d in list_serial_ports.comports()])
+        except:
+            logging.error('Unable to determine available ports', exc_info=True)
+            available_ports = []
+
         output = render_template('device_setup_base.html', driver=self,
                                  profile=profile,
                                  profile_name=profile_name,
-                                 profile_list=find_profiles(PROFILE_BASENAME))
+                                 profile_list=find_profiles(PROFILE_BASENAME),
+                                 available_ports=available_ports)
 
         return output
 
     def post_device_setup_handler(self):
         logging.info(f'post_device_setup_handler request.form={request.form}')
+
+        # do not accept changes while connected
+        if self.connected:
+            logging.error('post_device_setup_handler: request while connected!')
+            return render_template('modify_profile.html',
+                                   body_html='post_device_setup_handler: '
+                                             'Cannot send setup post requests '
+                                             'while device is connected!'
+                                             '<br><p><a href="setup">'
+                                             'Return to setup page</a>')
 
         # identify which form this is from
         form_id = request.form.get('form_id')

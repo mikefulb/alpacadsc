@@ -1,4 +1,5 @@
 {% block header %}
+    <title>Alt/Az Setting Circles Driver Setup</title>
     <h1>{% block title %} Alt/Az Setting Circles Driver Setup{% endblock %}</h1>
     <style>
       td {
@@ -178,7 +179,8 @@
                   <input type="text" name="serial_port" value="{{profile.encoders.serial_port}}">
                 </td>
                 <td>
-                  COMn: on Windows or /dev/ttyUSBn or /dev/ttyACMn on Linux
+                  COMn: on Windows or /dev/ttyUSBn or /dev/ttyACMn on Linux<br>
+                  Available ports: {{' '.join(available_ports)}}
                 </td>
               </tr>
               <tr>

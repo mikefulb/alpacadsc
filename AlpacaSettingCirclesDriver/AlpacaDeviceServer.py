@@ -21,7 +21,7 @@ import json
 import logging
 from threading import Thread
 
-from flask import Flask, Response, request
+from flask import Flask, Response, request, redirect, render_template
 
 _alpaca_url_base = '/v1/telescope/0'
 
@@ -109,40 +109,50 @@ class AlpacaDeviceServer(Thread):
 
         self.app = Flask(__name__)
 
+        get_func = self.EndpointHandler(self, self.device.get_action_handler, 'GET')
         self.app.add_url_rule('/api' + _alpaca_url_base + '/<action>',
                               'GET_ACTION',
                               methods=['GET'],
-                              view_func=self.EndpointHandler(self, self.device.get_action_handler, 'GET'))
+                              view_func=get_func)
 
+        put_func = self.EndpointHandler(self, self.device.put_action_handler, 'PUT')
         self.app.add_url_rule('/api' + _alpaca_url_base + '/<action>',
                               'PUT_ACTION',
                               methods=['PUT'],
-                              view_func=self.EndpointHandler(self, self.device.put_action_handler, 'PUT'))
+                              view_func=put_func)
 
         # Alpaca defines a global parameters setup for the device at '/setup'
+        global_get_func = self.EndpointHandler(self, self.get_global_setup_handler, 'GET')
         self.app.add_url_rule('/setup',
                               'GET_GLOBAL_SETUP',
                               methods=['GET'],
-                              view_func=self.EndpointHandler(self, self.get_global_setup_handler, 'GET'))
+                              view_func=global_get_func)
+
+        # for convenience redirect '/' to setup page
+        self.app.add_url_rule('/', 'ROOT_REDIRECT', methods=['GET'],
+                              view_func=self.redirect_root)
 
         # Specific setup for the actual device at '/setup' + _alpaca_url_base + '/setup'
         logging.info(f"adding endpoint {'/setup' + _alpaca_url_base + '/setup'}")
+        setup_func = self.EndpointHandler(self, self.device.get_device_setup_handler, 'GET')
         self.app.add_url_rule('/setup' + _alpaca_url_base + '/setup',
                               'GET_DEVICE_SETUP',
                               methods=['GET'],
-                              view_func=self.EndpointHandler(self, self.device.get_device_setup_handler, 'GET'))
+                              view_func=setup_func)
 
         self.app.add_url_rule('/setup' + _alpaca_url_base + '/setup',
                               'POST_DEVICE_SETUP',
                               methods=['POST'],
                               view_func=self.device.post_device_setup_handler)
 
-
         self.server_transaction_id = 0
 
         # die if main dies
         self.daemon = True
 
+    def redirect_root(self):
+        """Redirect root to setup page for convenience to user"""
+        return redirect('/setup')
 
     # handle device specific setup
     def get_global_setup_handler(self):
@@ -158,35 +168,9 @@ class AlpacaDeviceServer(Thread):
                 'ErrorNumber': error result for request
                 'ErrorString': string corresponding to error number
         """
-        return f"""
-    <html>
-      <head>
-        <title>Alt/Az Setting Circles Alpaca Server Information</title>
-        <style>
-          td {{
-             padding:0 15px;
-          }}
-        </style>
-      </head>
-      <body>
-        <h1>Alt/Az Setting Circles Alpaca Server Information</h1>
-        <h2>Server Info</h2>
-        <table>
-          <tr><td>Alpaca Server Address</td><td>{self.host}</td></tr>
-          <tr><td>Alpaca Server Port</td><td>{self.port}</td></tr>
-        </table>
-        <h2>Driver Info</h2>
-        <table>
-          <tr><td>Driver Name</td><td>{self.device.name}</td></tr>
-          <tr><td>Driver Info</td><td>{self.device.driverinfo}</td></tr>
-          <tr><td>Driver Description</td><td>{self.device.description}</td></tr>
-          <tr><td>Driver Version</td><td>{self.device.driver_version}</td></tr>
-        </table>
-        <br>
-        Device specific setup is available <a href=setup/v1/telescope/0/setup>here</a>.
-      </body>
-    </html>
-               """
+        return render_template('global_setup_base.html', server=self,
+                               device=self.device)
+
 
     def run(self):
         """
