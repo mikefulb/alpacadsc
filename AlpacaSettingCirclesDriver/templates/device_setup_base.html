@@ -1,34 +1,13 @@
+<html>
+<head>
 {% block header %}
     <title>Alt/Az Setting Circles Driver Setup</title>
-    <h1>{% block title %} Alt/Az Setting Circles Driver Setup{% endblock %}</h1>
-    <style>
-      td {
-        padding:0 15px;
-      }
-
-      body {
-        background-color: #c0c0ca;
-        color: #000000;
-      }
-      .hilight {
-        display: inline-block;
-        padding: 2px;
-        background-color: #b0b0c0;
-      }
-      table {
-        background-color: #d0d0c0;
-      }
-
-      /* other style stuff not involving colors */
-      * {
-          font-family: Arial;
-          /*font-size: 97%;*/
-          /*font-size: 14px;*/
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 {% endblock %}
-
+</head>
+<body>
 {% block content %}
+    <h1>{% block title %} Alt/Az Setting Circles Driver Setup{% endblock %}</h1>
     <h2>Driver Info</h2>
     <table>
       <tr><td>Driver Name</td><td>{{driver.drivername}}</td></tr>
@@ -254,4 +233,6 @@
         {% endif %}
     {% endif %}
 {% endblock %}
+</body>
+</html>
 

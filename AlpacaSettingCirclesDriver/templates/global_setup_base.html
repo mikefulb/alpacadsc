@@ -1,35 +1,13 @@
+<html>
+<head>
 {% block header %}
-        <title>Alt/Az Setting Circles Alpaca Server Information</title>
-    <h1>{% block title %} Alt/Az Setting Circles Alpaca Server Information{% endblock %}</h1>
-    <style>
-      td {
-        padding:0 15px;
-      }
-
-      body {
-        background-color: #c0c0ca;
-        color: #000000;
-      }
-      .hilight {
-        display: inline-block;
-        padding: 2px;
-        background-color: #b0b0c0;
-      }
-      table {
-        background-color: #d0d0c0;
-      }
-
-      /* other style stuff not involving colors */
-      * {
-          font-family: Arial;
-          /*font-size: 97%;*/
-          /*font-size: 14px;*/
-        }
-    </style>
+    <title>Alt/Az Setting Circles Alpaca Server Information</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 {% endblock %}
-
+</head>
+<body>
 {% block content %}
-      <body>
+    <h1>{% block title %} Alt/Az Setting Circles Alpaca Server Information{% endblock %}</h1>
         <h2>Server Info</h2>
         <table>
           <tr><td>Alpaca Server Address</td><td>{{server.host}}</td></tr>
@@ -44,6 +22,6 @@
         </table>
         <br>
         Device specific setup is available <a href=setup/v1/telescope/0/setup>here</a>.
-      </body>
 {% endblock %}
-
+</body>
+</html>
