@@ -78,10 +78,14 @@ load showing all the available profiles with a checkbox next to each one.
 Select the checkbox for the profile you want to switch to and then click
 the "Change Profile" button.
 
+The current profile will automatically be loaded whenever the service is started.
+
 Profiles are stored as YAML formatted files.  Under Linux they are stored
 in "$(HOME)/.config/AlpacaSettingCirclesDriver" and under Windows in
 "%APPDATA%/AlpacaSettingCirclesDriver".  If you want to backup your settings
-or move them to another computer you can copy the profiles stored here.q
+or move them to another computer you can copy the profiles stored here.  The
+current profile name is stored in the file "current_profile.yaml".
+
 
 """"""""
 Location
