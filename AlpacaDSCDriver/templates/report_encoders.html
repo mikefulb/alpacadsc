@@ -1,0 +1,34 @@
+<html>
+    <head>
+      <title>Alt/Az Setting Circles Driver Encoders Monitor</title>
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    </head>
+    <body>
+        <h1>Alt/Az Setting Circles Driver Encoders Monitor</h1>
+
+        <p>
+        <b>NOTE:</b> DSC must be connected to read counts and
+        driver must be sync'd with a star for ALT/AZ and RA/DEC
+        values to be reported.
+        <p>
+        <br>
+        <table>
+            <tr>
+                <td>Connected:</td>
+                <td>{{ driver.connected }}</td>
+            </tr>
+            <tr>
+                <td>Encoder ALT/AZ Counts: </td>
+                <td>{{ driver.encoders.get_encoder_position() }}</td>
+            </tr>
+            <tr>
+                <td>DSC ALT/AZ: </td>
+                <td>{{ driver.get_current_altaz() }}</td>
+            </tr>
+            <tr>
+                <td>DSC RA/DEC: </td>
+                <td>{{ driver.get_current_radec() }}</td>
+            </tr>
+        </table>
+    </body>
+</html>

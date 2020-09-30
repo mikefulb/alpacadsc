@@ -20,9 +20,6 @@
 #
 import os
 import sys
-
-#sys.path.append('../AlpacaSettingCirclesDriver')
-
 import time
 import logging
 import argparse
@@ -47,7 +44,7 @@ def parse_command_line():
 
 def runapp(args):
 
-    logging.info(f'AlpacaSettingCirclesDriver version {version} starting...')
+    logging.info(f'AlpacaDSCDriver version {version} starting...')
 
     # create alpaca device object
     device = TelescopeDevice(args.profile)

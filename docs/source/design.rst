@@ -105,7 +105,7 @@ The following Alpaca API interfaces are implemented:
 ======================== === === =====================================================
 Name                     GET SET Notes
 ======================== === === =====================================================
-alignmentmode            YES NO  Returns ALPCA_ALIGNMENT_ALTAZ
+alignmentmode            YES NO  Returns ALPACA_ALIGNMENT_ALTAZ
 altitude                 YES NO  Need to implement SET
 aperturearea             YES NO  Need to implement SET
 aperturediameter         YES NO  Need to implement SET
@@ -216,8 +216,8 @@ information:
 
 This profile is stored as a YACC file under a system configuration directory
 which depends on the system platform.  For Linux is it stored in the
-".config/AlpacaSettingCirclesDriver" directory in the user's home directory.
-In Windows it is stored in the directory "%APPDATA"/AlpacaSettingCirclesDriver".
+".config/AlpacaDSCDriver" directory in the user's home directory.
+In Windows it is stored in the directory "%APPDATA"/AlpacaDSCDriver".
 
 '''''''''''''
 Web dashboard

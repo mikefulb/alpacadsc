@@ -14,24 +14,24 @@ Installation
 The Alpaca Digital Setting Circles Driver (ADSCD) can be installed from source.
 It supports setup.py so the package can be installed using the command:
 
-python setup.py install
+    python3 setup.py install
 
 Alternately a distribution package can be created with:
 
-python setup.py bdist_wheel
+    python3 setup.py bdist_wheel
 
 The resulting package can be installed with:
 
-pip install <bdist_file>
+    python3 -m pip install <bdist_file>
 
-where <bdist_file> will be the newly created package in the 'dist/' folder.
+where <bdist_file> will be the newly created package in the "dist/" folder.
 
 Starting The Alpaca Service
 ...........................
 You will need to start the Alpaca service which will
 allow software to connect with your setting circles.  The command to do this is:
 
-python -m AlpacaSettingCirclesDriver.StartService
+    python -m AlpacaDSCDriver.StartService
 
 The service will start and by default listens to the port 8000 on the local host.
 
@@ -49,11 +49,16 @@ equipment.
 
 The configuration page is available by connecting a browser to:
 
-http://localhost:8000/setup/v1/telescope/0/setup
+    http://localhost:8000/setup/v1/telescope/0/setup
 
 As a convenience if you connect to:
 
-http://localhost:8000
+    http://localhost:8000
+
+or:
+
+    http://localhost:8000/setup
+
 
 a link will be provided to get to the actual configuration page.
 
@@ -75,12 +80,67 @@ the "Change Profile" button.
 
 The current profile will automatically be loaded whenever the service is started.
 
-Profiles are stored as YAML formatted files.  Under Linux they are stored
-in "$(HOME)/.config/AlpacaSettingCirclesDriver" and under Windows in
-"%APPDATA%/AlpacaSettingCirclesDriver".  If you want to backup your settings
-or move them to another computer you can copy the profiles stored here.  The
-current profile name is stored in the file "current_profile.yaml".
+Profiles are stored as YAML formatted files.  The location of the profile
+files depends on the platform:
 
+======= ================================
+Linux   $(HOME)/.config/AlpacaDSCDriver
+Windows %APPDATA%/AlpacaDSCDriver
+======= ================================
+
+If you want to backup your settings or move them to another computer you can
+copy the profiles stored here.  The current profile name is stored in the file
+"current_profile.yaml".
+
+The location configuration in the YAML file are stored in an array called
+"location" with the following keys:
+
+============= ======================== =============
+Key                  Data Type            Notes
+============= ======================== =============
+  obsname          String               Human readable name of location
+  longitude        Float                Longitude as decimal degrees
+  latitude         Float                Latitude as decimal degrees
+  altitude         Float                Altitude in meters
+============= ======================== =============
+
+An example is:
+
+.. code-block:: yaml
+
+    location:
+        obsname: Observatory
+        longitude: 100.0
+        latitude: 30.0
+        altitude: 450.0
+
+The encoder configuration in the YAML file are stored in an array called
+"encoders" with the following keys:
+
+=============== =========== ====================================================
+Key             Data Type   Notes
+=============== =========== ====================================================
+driver          String      Name of driver - currently "DaveEk" is only allowed
+serial_port     String      Serial port device name
+serial_speed    Integer     Serial port speed
+alt_resolution  Integer     Tics per revolution for alt encoder
+az_resolution   Integer     Tics per revolution for alt encoder
+alt_reverse     Boolean     If true then reverse alt axes
+az_reverse      Boolean     If true then reverse alt axes
+=============== =========== ====================================================
+
+An example is:
+
+.. code-block:: yaml
+
+    encoders:
+      alt_resolution: 4000
+      alt_reverse: false
+      az_resolution: 4000
+      az_reverse: false
+      driver: DaveEk
+      serial_port: /dev/ttyUSB1
+      serial_speed: 9600
 
 
 Location
@@ -126,3 +186,39 @@ then try reversing the axis.
 
 Once these settings are entered use the "Save Changes" button to make them
 permanent.  The button only saves the encoder settings.
+
+Using With Planetarium Software
+...............................
+
+First start the AlpacaDSCDriver service with the command:
+
+    python -m AlpacaDSCDriver.StartService
+
+Then use your software to connect to the service.  The software must support
+Alpaca to work with this driver.  You will want to configure the server IP
+as 127.0.0.1 or "localhost" and the server port as 8000.
+
+Once connected to the AlpacaDSCDriver service the driver will still need to
+be synchronized with the sky before it can report the position of the telescope.
+This is done by finding a star in your planetarium program and then manually
+pushing the telescope so the same star is centered in the eyepiece.  Now use
+the "Sync" command in your program to tell the driver to sync on the current
+position.  This will let the driver know the current telescope position and
+from then on the driver will report the ALT/AZ and RA/DEC values as the telescope
+is moved around.
+
+For best results choose a star to synchronize on which is close to the area of
+the sky you will be observing.  If you move to another part of the sky then
+you can synchronize on a new star in that region.  The sync operation will
+override the previous one.
+
+The synchronization with the sky is lost when the driver exits.
+
+Debugging Encoders
+..................
+There is a debugging web page generated by the driver which reports the
+current encoder raw counts if the driver is connected.  If the driver has been
+synchronized with a star then it will also report the current ALT/AZ and RA/DEC
+position.
+
+

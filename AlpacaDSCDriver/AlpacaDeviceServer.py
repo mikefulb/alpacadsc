@@ -145,6 +145,13 @@ class AlpacaDeviceServer(Thread):
                               methods=['POST'],
                               view_func=self.device.post_device_setup_handler)
 
+        # add endpoint to simply read encoder values
+        logging.info(f"adding endpoint {'/encoders'}")
+        self.app.add_url_rule('/encoders',
+                              'REPORT_ENCODERS',
+                              methods=['GET'],
+                              view_func=self.device.report_encoders_handler)
+
         self.server_transaction_id = 0
 
         # die if main dies

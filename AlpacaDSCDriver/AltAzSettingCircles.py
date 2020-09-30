@@ -18,7 +18,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 import os
-import sys
 import logging
 import serial.tools.list_ports as list_serial_ports
 from astropy.coordinates import EarthLocation, AltAz, SkyCoord
@@ -33,10 +32,10 @@ from .AltAzSettingCirclesProfile import AltAzSettingCirclesProfile as Profile
 from .EncodersAltAzDaveEk import EncodersAltAzDaveEk
 #from EncodersAltAzSimulator import EncodersAltAzSimulated
 
-from flask import request, render_template, Response
+from flask import request, render_template
 
 # base name used for profile storage
-PROFILE_BASENAME = "AlpacaSettingCirclesDriver"
+PROFILE_BASENAME = "AlpacaDSCDriver"
 
 class AltAzSettingCircles(AlpacaBaseDevice):
     """
@@ -344,20 +343,43 @@ class AltAzSettingCircles(AlpacaBaseDevice):
 
         return resp
 
+    def report_encoders_handler(self):
+        """
+        Handle reading encoders positions requests.
+
+        :returns:
+          (str) Rendered Flask template HTML output.
+        """
+
+        # determine if driver is connected or not
+        if self.connected:
+            # get encoders
+            enc_pos = self.encoders.get_encoder_position()
+            if enc_pos is None:
+                logging.error('report_encoders_handler: Unable to read encoder position!')
+        else:
+            logging.error('report_encoders_handler: Not connected to encoders.'
+                          'Unable to read encoder position!')
+            enc_pos = None
+
+        if enc_pos is not None:
+            enc_alt, enc_az = enc_pos
+        else:
+            enc_alt = None
+            enc_az = None
+
+        output = render_template('report_encoders.html', driver=self,
+                                 enc_alt=enc_alt, enc_az=enc_az)
+
+        return output
+
     # handle device specific setup
     def get_device_setup_handler(self):
         """
         Handle get setup requests.
 
-        :param setup: Setup URI.
-        :type setup: str
-
         :returns:
-          (dict) For requested setup return dict with:
-
-                'Value': return value for get request
-                'ErrorNumber': error result for request
-                'ErrorString': string corresponding to error number
+          (str) Rendered Flask template HTML output.
         """
 
         # determine if driver is connected or not
