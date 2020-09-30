@@ -609,7 +609,6 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             if len(error_resp) > 0:
                 logging.error('post_device_setup_handler: {error_resp}')
                 error_resp += '<br><a href="setup">Return to setup page</a>'
-#                return Response(f'{error_resp}',  status=200, headers={})
                 return render_template('modify_profile.html', body_html=error_resp)
 
             profile.encoders.encoder_driver = encoder_driver
@@ -624,24 +623,16 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             profile.write()
         else:
             logging.error('post_device_setup_handler: unknown form_id!')
-#            return Response(f'post_device_setup_handler: unknown form_id! '
-#                     f'called with form = {request.form}'
-#                     f'<br><a href="setup">Return to setup page</a>',
-#                     status=200, headers={})
-
             render_template('modify_profile.html',
                             body_html=f'post_device_setup_handler: unknown form_id! '
                             f'called with form = {request.form}'
                             f'<br><a href="setup">Return to setup page</a>')
 
-
-
-#        return Response(f'Profile {profile_id} updated.<br><a href="setup">'
-#                        f'Return to setup page</a>', status=200, headers={})
         return render_template('modify_profile.html',
                                body_html = f'Profile {profile_id} updated.<br> '
                                            f'<p><a href="setup">'
                                            f'Return to setup page</a>')
+
     # FIXME connect/disconnect does not distiguish between clients - is this
     #       even addressed by the Alpaca standard?  Need to investigate.
     def connect(self):

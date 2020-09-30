@@ -40,6 +40,10 @@ ALPACA_ALIGNMENT_POLAR = 1
 ALPACA_ALIGNMENT_GERMANPOLAR = 2
 
 class AlpacaBaseDevice:
+    """
+    AlpacaDeviceBase class is used to base any Alpaca device driver classes.
+    Handles the generic Alapca API calls common to all device types.
+    """
 
     def __init__(self):
         self.interface_version = 0
@@ -146,7 +150,7 @@ class AlpacaBaseDevice:
                 state_string = forms['Connected']
                 logging.debug(f'connected state_string = {state_string} requested')
             except KeyError:
-                logging.error(f'missing value for Connected')
+                logging.error('missing value for Connected')
                 resp['ErrorNumber'] = ALPACA_ERROR_INVALIDVALUE
             else:
                 if state_string not in ['True', 'true', 'False', 'false']:

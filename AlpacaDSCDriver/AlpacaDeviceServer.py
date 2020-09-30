@@ -23,8 +23,8 @@ from threading import Thread
 
 from flask import Flask, Response, request, redirect, render_template
 
+# Currently only support a single DSC per service instance
 _alpaca_url_base = '/v1/telescope/0'
-
 
 class AlpacaDeviceServer(Thread):
     """
@@ -177,7 +177,6 @@ class AlpacaDeviceServer(Thread):
         """
         return render_template('global_setup_base.html', server=self,
                                device=self.device)
-
 
     def run(self):
         """

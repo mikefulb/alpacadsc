@@ -302,7 +302,7 @@ class Profile:
         if not os.path.isdir(self._get_config_dir()):
             if os.path.exists(self._get_config_dir()):
                 logging.error(f'write settings: config dir {self._get_config_dir()}' + \
-                              f' already exists and is not a directory!')
+                              ' already exists and is not a directory!')
                 return False
             else:
                 logging.info(f'write settings: creating config dir {self._get_config_dir()}')
