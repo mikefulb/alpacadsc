@@ -7,12 +7,13 @@ Welcome to AlpacaSettingCirclesDriver's documentation!
 ======================================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    usage
    modules
    design
+
 
 Indices and tables
 ==================

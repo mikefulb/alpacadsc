@@ -1,8 +1,7 @@
-.. sectnum::
 
-==============================================================
-Design Specification For Alpaca Digital Setting Circles Driver
-==============================================================
+====================
+Design Specification
+====================
 
 Author: Michael Fulbright
 

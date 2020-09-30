@@ -1,18 +1,14 @@
-.. sectnum::
 
-================================================================
-Usage Instructions For The Alpaca Digital Setting Circles Driver
-================================================================
+*****
+Usage
+*****
 
 Author: Michael Fulbright
 
 Contact: mike.fulbright@pobox.com
 
-Status: Initial draft
-
 Date: 2020-09-29
 
-............
 Installation
 ............
 The Alpaca Digital Setting Circles Driver (ADSCD) can be installed from source.
@@ -30,7 +26,6 @@ pip install <bdist_file>
 
 where <bdist_file> will be the newly created package in the 'dist/' folder.
 
-...........................
 Starting The Alpaca Service
 ...........................
 You will need to start the Alpaca service which will
@@ -40,7 +35,7 @@ python -m AlpacaSettingCirclesDriver.StartService
 
 The service will start and by default listens to the port 8000 on the local host.
 
-.............
+
 Configuration
 .............
 Before connecting to the Alpaca service you will need to configure a profile for your
@@ -62,7 +57,7 @@ http://localhost:8000
 
 a link will be provided to get to the actual configuration page.
 
-""""""""
+
 Profiles
 """"""""
 The first step is to create a new profile for your equipment.  This is done using
@@ -87,7 +82,7 @@ or move them to another computer you can copy the profiles stored here.  The
 current profile name is stored in the file "current_profile.yaml".
 
 
-""""""""
+
 Location
 """"""""
 The observing location needs to be set for each profile.  This consists of
