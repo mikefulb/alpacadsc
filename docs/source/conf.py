@@ -12,12 +12,12 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../AlpacaSettingCirclesDriver'))
+sys.path.insert(0, os.path.abspath('../../AlpacaDSCDriver'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'AlpacaSettingCirclesDriver'
+project = 'AlpacaDSCDriver'
 copyright = '2020, Michael Fulbright'
 author = 'Michael Fulbright'
 

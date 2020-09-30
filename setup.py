@@ -9,13 +9,13 @@ here = pathlib.Path(__file__).parent.resolve()
 long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 # get version
-from AlpacaSettingCirclesDriver import __version__ as AlpacaSettingCirclesDriver_Version
+from AlpacaDSCDriver import __version__ as AlpacaDSCDriver_Version
 
 setup(
 
-    name='AlpacaSettingCirclesDriver',  # Required
+    name='AlpacaDSCDriver',  # Required
 
-    version=AlpacaSettingCirclesDriver_Version,  # Required
+    version=AlpacaDSCDriver_Version,  # Required
 
     description='Digital setting circles support with Alpaca REST API',  # Optional
 
@@ -51,7 +51,7 @@ setup(
 
     package_dir={},  # Optional
 
-    packages=find_packages(include=['AlpacaSettingCirclesDriver']),  # Required
+    packages=find_packages(include=['AlpacaDSCDriver']),  # Required
 
     python_requires='>=3.7, <4',
 
@@ -67,7 +67,7 @@ setup(
 
     entry_points={  # Optional
         'console_scripts': [
-            'AlpacaSettingCirclesDriver = AlpacaSettingCirclesDriver.StartService:main',
+            'AlpacaDSCDriver = AlpacaDSCDriver.StartService:main',
         ],
     },
 

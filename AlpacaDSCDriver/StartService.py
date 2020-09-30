@@ -62,7 +62,7 @@ def runapp(args):
 
 def main():
     # FIXME assumes tz is set properly in system?
-    logfilename = 'AlpacaSettingCirclesDriver'
+    logfilename = 'AlpacaDSCDriver'
     logfilename += '-' + datetime.now().strftime('%Y%m%d%H%M%S')
     logfilename += '.log'
 
