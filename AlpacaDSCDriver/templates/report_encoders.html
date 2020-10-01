@@ -17,18 +17,25 @@
                 <td>Connected:</td>
                 <td>{{ driver.connected }}</td>
             </tr>
-            <tr>
-                <td>Encoder ALT/AZ Counts: </td>
-                <td>{{ driver.encoders.get_encoder_position() }}</td>
-            </tr>
-            <tr>
-                <td>DSC ALT/AZ: </td>
-                <td>{{ driver.get_current_altaz() }}</td>
-            </tr>
-            <tr>
-                <td>DSC RA/DEC: </td>
-                <td>{{ driver.get_current_radec() }}</td>
-            </tr>
+            {% if driver.encoders is not none %}
+                <tr>
+                    <td>Encoder ALT/AZ Counts: </td>
+                    <td>{{ driver.encoders.get_encoder_position() }}</td>
+                </tr>
+                <tr>
+                    <td>DSC ALT/AZ: </td>
+                    <td>{{ driver.get_current_altaz() }}</td>
+                </tr>
+                <tr>
+                    <td>DSC RA/DEC: </td>
+                    <td>{{ driver.get_current_radec() }}</td>
+                </tr>
         </table>
+            {% else %}
+                </table>
+                <p>Encoders not available. Please configure and connect to encoders.
+            {% endif %}
+
+
     </body>
 </html>

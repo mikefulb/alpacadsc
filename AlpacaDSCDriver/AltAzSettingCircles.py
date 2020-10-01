@@ -23,6 +23,8 @@ import serial.tools.list_ports as list_serial_ports
 from astropy.coordinates import EarthLocation, AltAz, SkyCoord
 from astropy.time import Time
 from astropy import units as u
+
+from . import __version__ as AlpacaDSCDriver_Version
 from .AlpacaBaseDevice import AlpacaBaseDevice
 from .AlpacaBaseDevice import ALPACA_ALIGNMENT_ALTAZ
 from .AlpacaBaseDevice import ALPACA_ERROR_STRINGS
@@ -104,6 +106,8 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         self.trackingrate = 0.0
         self.utcdate = 0
         self.destinationsideofpier = 0
+
+        self.encoders = None
 
         self.enc_alt0 = None
         self.enc_az0 = None
@@ -351,25 +355,15 @@ class AltAzSettingCircles(AlpacaBaseDevice):
           (str) Rendered Flask template HTML output.
         """
 
-        # determine if driver is connected or not
-        if self.connected:
-            # get encoders
-            enc_pos = self.encoders.get_encoder_position()
-            if enc_pos is None:
-                logging.error('report_encoders_handler: Unable to read encoder position!')
-        else:
+        # see if encoders configured?
+        if self.encoders is None:
+            logging.error('report_encoders_handler: Encoders not configured.'
+                          'Unable to read encoder position!')
+        elif not self.connected:
             logging.error('report_encoders_handler: Not connected to encoders.'
                           'Unable to read encoder position!')
-            enc_pos = None
 
-        if enc_pos is not None:
-            enc_alt, enc_az = enc_pos
-        else:
-            enc_alt = None
-            enc_az = None
-
-        output = render_template('report_encoders.html', driver=self,
-                                 enc_alt=enc_alt, enc_az=enc_az)
+        output = render_template('report_encoders.html', driver=self)
 
         return output
 
