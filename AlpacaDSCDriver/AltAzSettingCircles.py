@@ -556,8 +556,8 @@ class AltAzSettingCircles(AlpacaBaseDevice):
                 return render_template('modify_profile.html', body_html=error_resp)
 
             profile.location.obsname = obsname
-            profile.location.longitude = lat_value
-            profile.location.latitude = lon_value
+            profile.location.longitude = lon_value
+            profile.location.latitude = lat_value
             profile.location.altitude = alt_value
 
             logging.info(f'profile before write: {profile}')
