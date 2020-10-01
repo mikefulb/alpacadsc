@@ -51,7 +51,7 @@ class AltAzSettingCircles(AlpacaBaseDevice):
 
         # driver info
         self.driver_version = AlpacaDSCDriver_Version
-        self.description = 'Alt/Az Setting Cirles'
+        self.description = 'Alt/Az Setting Circles'
         self.driverinfo = self.description + f' V. {self.driver_version}'
         self.name = 'AltAzSettingCircles'
         #self.supported_actions = [] # FIXME NOT NEEDED?
