@@ -50,7 +50,7 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         super().__init__()
 
         # driver info
-        self.driver_version = 0.1
+        self.driver_version = AlpacaDSCDriver_Version
         self.description = 'Alt/Az Setting Cirles'
         self.driverinfo = self.description + f' V. {self.driver_version}'
         self.name = 'AltAzSettingCircles'
