@@ -347,6 +347,18 @@ class AltAzSettingCircles(AlpacaBaseDevice):
 
         return resp
 
+    def about_handler(self):
+        """
+        Handle "/about" endpoint with info about the driver.
+
+        :returns:
+          (str) Rendered Flask template HTML output.
+        """
+
+        output = render_template('about.html', driver=self)
+
+        return output
+
     def report_encoders_handler(self):
         """
         Handle reading encoders positions requests.

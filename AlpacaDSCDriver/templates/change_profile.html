@@ -1,9 +1,10 @@
-<html>
-  <head>
-    <title>Alt/Az Setting Circles Driver Setup</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-  </head>
-  <body>
+{% extends "layout.html" %}
+
+{% block title %}
+Alt/Az Setting Circles Driver Setup
+{% endblock %}
+
+{% block content %}
     <h1>Alt/Az Setting Circles Driver Setup</h1>
     <h2>Change Profile</h2>
 
@@ -36,6 +37,4 @@
             <input type="submit" value="Change Profile">
         </form>
     {% endif %}
-
-  </body>
-</html>
+{% endblock %}

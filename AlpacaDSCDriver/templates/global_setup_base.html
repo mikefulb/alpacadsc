@@ -1,13 +1,11 @@
-<html>
-<head>
-{% block header %}
-    <title>Alt/Az Setting Circles Alpaca Server Information</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+{% extends "layout.html" %}
+
+{% block title %}
+Alt/Az Setting Circles Alpaca Server Information
 {% endblock %}
-</head>
-<body>
+
 {% block content %}
-    <h1>{% block title %} Alt/Az Setting Circles Alpaca Server Information{% endblock %}</h1>
+    <h1>Alt/Az Setting Circles Alpaca Server Information</h1>
         <h2>Server Info</h2>
         <table>
           <tr><td>Alpaca Server Address</td><td>{{server.host}}</td></tr>
@@ -21,7 +19,6 @@
           <tr><td>Driver Version</td><td>{{device.driver_version}}</td></tr>
         </table>
         <br>
-        Device specific setup is available <a href=setup/v1/telescope/0/setup>here</a>.
+        Device specific setup is available under "Driver Setup" in the
+        navigation bar at the top of the page.
 {% endblock %}
-</body>
-</html>

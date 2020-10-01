@@ -1,16 +1,14 @@
-<html>
-<head>
-{% block header %}
-    <title>Alt/Az Setting Circles Driver Setup</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+{% extends "layout.html" %}
+
+{% block title %}
+Alt/Az Setting Circles Driver Setup
 {% endblock %}
-</head>
-<body>
+
 {% block content %}
-    <h1>{% block title %} Alt/Az Setting Circles Driver Setup{% endblock %}</h1>
+    <h1>Alt/Az Setting Circles Driver Setup</h1>
     <h2>Driver Info</h2>
     <table>
-      <tr><td>Driver Name</td><td>{{driver.drivername}}</td></tr>
+      <tr><td>Driver Name</td><td>{{driver.name}}</td></tr>
       <tr><td>Driver Info</td><td>{{driver.driverinfo}}</td></tr>
       <tr><td>Driver Description</td><td>{{driver.description}}</td></tr>
       <tr><td>Driver Version</td><td>{{driver.driver_version}}</td></tr>
@@ -233,6 +231,4 @@
         {% endif %}
     {% endif %}
 {% endblock %}
-</body>
-</html>
 

@@ -152,6 +152,13 @@ class AlpacaDeviceServer(Thread):
                               methods=['GET'],
                               view_func=self.device.report_encoders_handler)
 
+        # add endpoint for info about the driver
+        logging.info(f"adding endpoint {'/about'}")
+        self.app.add_url_rule('/about',
+                              'ABOUT_DRIVER',
+                              methods=['GET'],
+                              view_func=self.device.about_handler)
+
         self.server_transaction_id = 0
 
         # die if main dies

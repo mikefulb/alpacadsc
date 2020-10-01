@@ -1,25 +1,46 @@
-    <style>
-      td {
-        padding:0 15px;
-      }
+<style>
+  td {
+    padding:0 15px;
+  }
 
-      body {
-        background-color: #c0c0ca;
-        color: #000000;
-      }
-      .hilight {
-        display: inline-block;
-        padding: 2px;
-        background-color: #b0b0c0;
-      }
-      table {
-        background-color: #d0d0c0;
-      }
+  body {
+    background-color: #c0c0ca;
+    color: #000000;
+  }
+  .hilight {
+    display: inline-block;
+    padding: 2px;
+    background-color: #b0b0c0;
+  }
+  table {
+    background-color: #d0d0c0;
+  }
 
-      /* other style stuff not involving colors */
-      * {
-          font-family: Arial;
-          /*font-size: 97%;*/
-          /*font-size: 14px;*/
-        }
-    </style>
+  /* other style stuff not involving colors */
+  * {
+      font-family: Arial;
+      /*font-size: 97%;*/
+      /*font-size: 14px;*/
+    }
+
+    .navbar {
+      background-color: #333;
+      overflow: hidden;
+    }
+
+    .navbar a {
+      float: left;
+      color: #f2f2f2;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none;
+      font-size: 17px;
+    }
+
+    .navbar a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+
+</style>
