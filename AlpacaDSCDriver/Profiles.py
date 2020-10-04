@@ -17,9 +17,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 import os
-import glob
 import logging
 from dataclasses import dataclass
+from pathlib import Path
 import yaml
 
 def get_base_config_dir():
@@ -27,16 +27,16 @@ def get_base_config_dir():
     Find base path for where to store config files depending on platform.
 
     :returns:
-        (str) Root path of where config files are stored or None if location
-        could not be determined for platform.
+        (Path) Root path of where config files are stored
+    :raises FileNotFoundError: If base path cannot be determined.
     """
     if os.name == 'nt':
-        basedir = os.path.expandvars('%APPDATA%')
+        basedir = Path(os.path.expandvars('%APPDATA%'))
     elif os.name == 'posix':
-        basedir = os.path.join(os.path.expanduser('~'), '.config')
+        basedir = Path.home() / '.config'
     else:
         logging.error('Profile: Unable to determine OS for config_dir loc!')
-        basedir = None
+        raise FileNotFoundError
     return basedir
 
 def find_profiles(loc):
@@ -50,11 +50,11 @@ def find_profiles(loc):
     :note: Assumes profile configuration files end with '.yaml'
 
     :returns:
-        (list) List of profiles found or None if none available.
+        (List[str]) List of profiles found or [] if none available.
     """
-    config_glob = os.path.join(get_base_config_dir(), loc, '*.yaml')
-    ini_files = sorted(glob.glob(config_glob))
-    return ini_files
+    config_path = get_base_config_dir() / loc
+    config_files = config_path.glob('*.yaml')
+    return sorted(x.name for x in config_files if x.name != 'current_profile.yaml')
 
 def set_current_profile(loc, current_profile_name):
     """
@@ -71,16 +71,12 @@ def set_current_profile(loc, current_profile_name):
         (bool) Whether operation was successful or not
 
     """
-    basedir = get_base_config_dir()
-    if basedir is None:
-        return False
-
-    basedir = os.path.join(basedir, loc)
+    basedir = get_base_config_dir() / loc
 
     dataobj = {'current_profile' : current_profile_name}
-    yaml_f = open(os.path.join(basedir, 'current_profile.yaml'), 'w')
-    yaml.dump(dataobj, stream=yaml_f, default_flow_style=False)
-    yaml_f.close()
+    yaml_cur_file = basedir / 'current_profile.yaml'
+    with yaml_cur_file.open('w') as yaml_f:
+        yaml.dump(dataobj, stream=yaml_f, default_flow_style=False)
 
     return True
 
@@ -95,22 +91,20 @@ def get_current_profile(loc):
         (str) Name of currently active profile or None if none defined.
 
     """
-    basedir = get_base_config_dir()
-    if basedir is None:
-        return False
+    basedir = get_base_config_dir() / loc
 
-    basedir = os.path.join(basedir, loc)
+    yaml_cur_file = basedir / 'current_profile.yaml'
 
-    try:
-        yaml_f = open(os.path.join(basedir, 'current_profile.yaml'), 'r')
+    # see if file exists and if it doesn't then there is no current profile
+    if not yaml_cur_file.exists():
+        return None
+
+    d = {}
+    with yaml_cur_file.open('r') as yaml_f:
         d = yaml.safe_load(stream=yaml_f)
-        yaml_f.close()
-        current_profile_name = d.get('current_profile', None)
 
-    except FileNotFoundError:
-        current_profile_name = None
+    return d.get('current_profile', None)
 
-    return current_profile_name
 
 @dataclass
 class ProfileSection(object):
@@ -242,49 +236,30 @@ class Profile:
         Find base path for where to store config files depending on platform.
 
         :returns:
-            (str) Root path of where config files are stored or None if location
+            (Path) Root path of where config files are stored or None if location
             could not be determined for platform.
         """
 
-
         if self._config_reldir is None:
-            return '.'
+            return Path('.')
 
-        base_dir = get_base_config_dir()
-        if base_dir is None:
-            return None
-
-        return os.path.join(base_dir, self._config_reldir)
-
-        # FIXME: This function is probably a duplicate of get_base_config_dir and
-        # duplicated could below can be removed
-
-#        if os.name == 'nt':
-#            base_config_dir = get_base_config_dir()
-#            config_dir = os.path.join(base_config_dir, self._config_reldir)
-#        elif os.name == 'posix':
-#            base_config_dir = get_base_config_dir()
-#            config_dir = os.path.join(base_config_dir, self._config_reldir)
-#        else:
-#            logging.error('Profile: Unable to determine OS for config_dir loc!')
-#            config_dir = None
-#        return config_dir
+        return get_base_config_dir() / self._config_reldir
 
     def _get_config_filename(self):
         """
         Create full path to profile config file
 
         :returns:
-            (str) Full path to profile config file.
+            (Path) Full path to profile config file.
         """
-        return os.path.join(self._get_config_dir(), self._config_filename)
+        return Path(self._get_config_dir()) / self._config_filename
 
     def filename(self):
         """
         Return profile config filename.
 
         :returns:
-            (str) Profile filename
+            (Path) Profile filename
         """
         return self._get_config_filename()
 
@@ -299,14 +274,14 @@ class Profile:
         logging.debug(f'Configuration files stored in {self._get_config_dir()}')
 
         # check if config directory exists
-        if not os.path.isdir(self._get_config_dir()):
-            if os.path.exists(self._get_config_dir()):
+        if not self._get_config_dir().is_dir():
+            if self._get_config_dir().exists():
                 logging.error(f'write settings: config dir {self._get_config_dir()}' + \
                               ' already exists and is not a directory!')
                 return False
             else:
                 logging.info(f'write settings: creating config dir {self._get_config_dir()}')
-                os.makedirs(self._get_config_dir())
+                self._get_config_dir().makedirs()
 
         logging.info(f'write() config filename: {self._get_config_filename()}')
 
@@ -315,9 +290,9 @@ class Profile:
         for k, v in self.sections.items():
             dataobj[k] = self.__dict__[k]._to_dict()
 
-        yaml_f = open(self._get_config_filename(), 'w')
-        yaml.dump(dataobj, stream=yaml_f, default_flow_style=False)
-        yaml_f.close()
+        with self._get_config_filename().open('w') as yaml_f:
+            yaml.dump(dataobj, stream=yaml_f, default_flow_style=False)
+
         return True
 
     def read(self):
@@ -327,9 +302,8 @@ class Profile:
         :returns:
             (bool) Whether or not read succeeded.
         """
-        yaml_f = open(self._get_config_filename(), 'r')
-        d = yaml.safe_load(stream=yaml_f)
-        yaml_f.close()
+        with self._get_config_filename().open('r') as yaml_f:
+            d = yaml.safe_load(stream=yaml_f)
 
         # from_dict() must be defined in child
         for k, v in d.items():

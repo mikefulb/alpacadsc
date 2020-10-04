@@ -17,8 +17,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-import os
+#import os
 import logging
+from pathlib import Path
 import serial.tools.list_ports as list_serial_ports
 from astropy.coordinates import EarthLocation, AltAz, SkyCoord
 from astropy.time import Time
@@ -438,12 +439,7 @@ class AltAzSettingCircles(AlpacaBaseDevice):
 
         # handle change current profile request
         if form_id == 'change_profile_form':
-            raw_profile_list=find_profiles(PROFILE_BASENAME)
-            profile_list = []
-            for p in raw_profile_list:
-                base = os.path.basename(p)
-                fname, ext = os.path.splitext(base)
-                profile_list.append(fname)
+            profile_list = [Path(x).stem for x in find_profiles(PROFILE_BASENAME)]
             return render_template('change_profile.html',
                                    current_profile=get_current_profile(PROFILE_BASENAME),
                                    profile_list=profile_list)
