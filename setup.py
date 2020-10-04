@@ -23,7 +23,7 @@ setup(
 
     long_description_content_type='text/markdown',  # Optional (see note above)
 
-    url='https://github.com/msf/AlpacaSettingCirclesDriver',  # Optional
+    url='https://github.com/msf/AlpacaDSCDriver',  # Optional
 
     author='Michael Fulbright',  # Optional
 

@@ -30,7 +30,6 @@ author = 'Michael Fulbright'
 extensions = [
         'sphinx.ext.autodoc',
         'sphinx.ext.autosummary',
-        'sphinxcontrib.spelling',
         'sphinx.ext.napoleon'
 
 ]

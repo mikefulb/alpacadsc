@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Alt/Az Setting Circles Alpaca - About
+{% endblock %}
+
+{% block content %}
+    <h1>Alt/Az Setting Circles Alpaca - About</h1>
+
+    <div>
+    <h2>Driver Info</h2>
+    <table>
+      <tr><td>Driver Name</td><td>{{driver.name}}</td></tr>
+      <tr><td>Driver Info</td><td>{{driver.driverinfo}}</td></tr>
+      <tr><td>Driver Description</td><td>{{driver.description}}</td></tr>
+      <tr><td>Driver Version</td><td>{{driver.driver_version}}</td></tr>
+    </table>
+    </div>
+    <h2>About</h2>
+    <div>
+    <p>
+    The Alpaca DSC Driver allows connecting to a digital settings circles (DSC)
+    on a Dobsonian ALT/AZ telescope and creates an Alpaca service which
+    client software can connect to and track the position of the telescope.
+    Currently the DSC must support the "Dave EK" protocol.
+    </p>
+    <p>
+    The author can be contacted at mike.fulbright@pobox.com.
+    </p>
+{% endblock %}

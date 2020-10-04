@@ -1,0 +1,18 @@
+<html>
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+
+<div class="navbar">
+  <a href="/setup">Server Info</a>
+  <a href="/setup/v1/telescope/0/setup">Driver Setup</a>
+  <a href="/encoders">Monitor Encoders</a>
+  <a href="/about">About</a>
+</div>
+
+{% block content %}
+{% endblock %}
+</body>
+</html>
