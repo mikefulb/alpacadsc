@@ -281,14 +281,15 @@ class Profile:
                 return False
             else:
                 logging.info(f'write settings: creating config dir {self._get_config_dir()}')
-                self._get_config_dir().makedirs()
+                self._get_config_dir().mkdir(parents=True)
 
         logging.info(f'write() config filename: {self._get_config_filename()}')
 
         # to_dict() must be defined by child class
-        dataobj = {}
-        for k, v in self.sections.items():
-            dataobj[k] = self.__dict__[k]._to_dict()
+        # dataobj = {}
+        # for k, v in self.sections.items():
+        #     dataobj[k] = self.__dict__[k]._to_dict()
+        dataobj = self._to_dict()
 
         with self._get_config_filename().open('w') as yaml_f:
             yaml.dump(dataobj, stream=yaml_f, default_flow_style=False)
@@ -310,6 +311,12 @@ class Profile:
             self.__dict__[k] = self.sections[k]()
             self.__dict__[k]._from_dict(v)
         return True
+
+    def _to_dict(self):
+        dataobj = {}
+        for k, v in self.sections.items():
+            dataobj[k] = self.__dict__[k]._to_dict()
+        return dataobj
 
     def __repr__(self):
         """
