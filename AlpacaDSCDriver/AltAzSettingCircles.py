@@ -33,7 +33,7 @@ from .AlpacaBaseDevice import ALPACA_ERROR_NOTIMPLEMENTED
 from .Profiles import find_profiles, set_current_profile, get_current_profile
 from .AltAzSettingCirclesProfile import AltAzSettingCirclesProfile as Profile
 from .EncodersAltAzDaveEk import EncodersAltAzDaveEk
-#from EncodersAltAzSimulator import EncodersAltAzSimulated
+from .EncodersAltAzSimulator import EncodersAltAzSimulated
 
 from flask import request, render_template
 
@@ -199,11 +199,18 @@ class AltAzSettingCircles(AlpacaBaseDevice):
 
         if encoder_drv == 'DaveEk':
             self.encoders = EncodersAltAzDaveEk(res_alt=encoders_profile.alt_resolution,
-                                     res_az=encoders_profile.az_resolution,
-                                     reverse_alt=encoders_profile.alt_reverse,
-                                     reverse_az=encoders_profile.az_reverse)
+                                                res_az=encoders_profile.az_resolution,
+                                                reverse_alt=encoders_profile.alt_reverse,
+                                                reverse_az=encoders_profile.az_reverse)
             self.encoders.connect(encoders_profile.serial_port,
-                             speed=encoders_profile.serial_speed)
+                                  speed=encoders_profile.serial_speed)
+        elif encoder_drv == 'Simulator':
+            self.encoders = EncodersAltAzSimulated(res_alt=encoders_profile.alt_resolution,
+                                                   res_az=encoders_profile.az_resolution,
+                                                   reverse_alt=encoders_profile.alt_reverse,
+                                                   reverse_az=encoders_profile.az_reverse)
+            self.encoders.connect(encoders_profile.serial_port,
+                                  speed=encoders_profile.serial_speed)
         else:
             logging.error(f'Unknown encoder driver {encoder_drv} requested!')
             self.encoders = None
@@ -603,57 +610,6 @@ class AltAzSettingCircles(AlpacaBaseDevice):
 
             profile.write()
 
-        # elif form_id == 'location_modify_form':
-        #     encoder_driver = request.form.get('encoder_driver')
-        #     serial_port = request.form.get('serial_port')
-        #     serial_speed = request.form.get('serial_speed')
-        #     alt_resolution = request.form.get('alt_resolution')
-        #     az_resolution = request.form.get('az_resolution')
-        #     alt_reverse =  request.form.get('alt_reverse', 'false') != 'false'
-        #     az_reverse = request.form.get('az_reverse', 'false') != 'false'
-
-        #     logging.info(f'{encoder_driver} {serial_port} {serial_speed} '
-        #                  f'{alt_resolution} {az_resolution} '
-        #                  f'{alt_reverse} {az_reverse}')
-
-        #     if None in [encoder_driver, serial_port, serial_speed,
-        #                 alt_resolution, az_resolution, alt_reverse,
-        #                 az_reverse]:
-        #         logging.error('post_device_setup_handler: Missing required fields!')
-        #         return render_template('modify_profile.html',
-        #                                body_html='post_device_setup_handler: Missing '
-        #                                          'required fields!<br><p><a href="setup">'
-        #                                          'Return to setup page</a>')
-
-        #     error_resp = ''
-
-        #     if encoder_driver not in ['DaveEk']:
-        #         error_resp += f'<br>Driver {encoder_driver} is not valid.<br>'
-        #         error_resp += 'Valid choice is "DaveEk"'
-
-        #     try:
-        #         alt_resolution_value = int(alt_resolution)
-        #         az_resolution_value = int(az_resolution)
-        #         serial_speed_value = int(serial_speed)
-        #     except:
-        #         error_resp += '<br>Error - alt_resolution, az_resolution and '
-        #         error_resp += 'serial_speed require integer values!'
-
-        #     if len(error_resp) > 0:
-        #         logging.error('post_device_setup_handler: {error_resp}')
-        #         error_resp += '<br><a href="setup">Return to setup page</a>'
-        #         return render_template('modify_profile.html', body_html=error_resp)
-
-        #     profile.encoders.encoder_driver = encoder_driver
-        #     profile.encoders.serial_port = serial_port
-        #     profile.encoders.serial_speed = serial_speed_value
-        #     profile.encoders.alt_resolution = alt_resolution_value
-        #     profile.encoders.az_resolution = az_resolution_value
-        #     profile.encoders.alt_reverse = alt_reverse
-        #     profile.encoders.az_reverse = az_reverse
-        #     logging.info(f'profile before write: {profile}')
-
-        #     profile.write()
         else:
             logging.error('post_device_setup_handler: unknown form_id!')
             render_template('modify_profile.html',
@@ -708,6 +664,8 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         self.unload_current_profile()
 
         self.connected = False
+
+        return True
 
     def convert_encoder_position_to_altaz(self, enc_alt, enc_az):
         """

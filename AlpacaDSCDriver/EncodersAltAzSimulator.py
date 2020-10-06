@@ -31,10 +31,12 @@ class EncodersAltAzSimulated:
     def connect(self, port, speed=9600):
         return True
 
+    def disconnect(self):
+        return True
+
     def get_encoder_resolution(self):
-        alt_steps = 4000
-        az_steps = 4000
-        logging.debug(f'get_encoder_resolution:  alt_steps={alt_steps}, az_steps={az_steps}')
+        logging.debug(f'get_encoder_resolution:  alt_steps={self.res_alt}, az_steps={self.res_az}')
+        return self.res_alt, self.res_az
 
     def get_encoder_position(self):
         alt_steps = 2000
