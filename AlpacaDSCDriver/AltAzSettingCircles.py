@@ -148,6 +148,19 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             logging.error('load_current_profile: Failed to load profile!')
             return False
 
+        # validate location values
+        error_list = []
+        if not isinstance(profile.location.latitude, float):
+            error_list.append('Latitude must be a float')
+        if not isinstance(profile.location.longitude, float):
+            error_list.append('Longitude must be a float')
+        if not isinstance(profile.location.altitude, float):
+            error_list.append('Altitude must be a float')
+
+        if len(error_list) > 0:
+            logging.error(f'Error with profile {profile_name}: {error_list}')
+            return False
+
         self.profile = profile
         self.profile_name = profile_name
         logging.info(f'Loaded profile {self.profile_name} = {self.profile}')
@@ -267,6 +280,14 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             else:
                 resp['Value'] = 0
         else:
+            # FIXME should probably have this work in reverse with
+            # having a handler in super class that you can augment
+            # with additoinal handlers and it works down the list
+            #
+            # As it is here wherever you write a new driver you have to
+            # remember to call the super class handler as well which seems
+            # like a good way to have mistakes in coding occur
+            #
             # try with any registered handlers
             base_resp = super().get_action_handler(action)
             resp['Value'] = base_resp['Value']
@@ -338,6 +359,14 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             logging.error(f'Need to handle {action}!')
             resp['ErrorNumber'] = 0
         else:
+            # FIXME should probably have this work in reverse with
+            # having a handler in super class that you can augment
+            # with additoinal handlers and it works down the list
+            #
+            # As it is here wherever you write a new driver you have to
+            # remember to call the super class handler as well which seems
+            # like a good way to have mistakes in coding occur
+            #
             # try with any registered handlers
             base_resp = super().put_action_handler(action, forms)
             resp['ErrorNumber'] = base_resp['ErrorNumber']
@@ -489,8 +518,8 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             serial_speed = request.form.get('serial_speed')
             alt_resolution = request.form.get('alt_resolution')
             az_resolution = request.form.get('az_resolution')
-            alt_reverse =  request.form.get('alt_reverse', 'false') != 'false'
-            az_reverse = request.form.get('az_reverse', 'false') != 'false'
+            alt_reverse =  request.form.get('alt_reverse', 'false').lower() != 'false'
+            az_reverse = request.form.get('az_reverse', 'false').lower() != 'false'
 
             logging.info(f'{encoder_driver} {serial_port} {serial_speed} '
                          f'{alt_resolution} {az_resolution} '
@@ -534,7 +563,9 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             logging.info(f'profile before write: {profile}')
 
             profile.write()
-        if form_id == 'location_modify_form':
+
+        elif form_id == 'location_modify_form':
+            #print(request.form)
             obsname = request.form.get('name')
             lat = request.form.get('latitude')
             lon = request.form.get('longitude')
@@ -572,57 +603,57 @@ class AltAzSettingCircles(AlpacaBaseDevice):
 
             profile.write()
 
-        elif form_id == 'location_modify_form':
-            encoder_driver = request.form.get('encoder_driver')
-            serial_port = request.form.get('serial_port')
-            serial_speed = request.form.get('serial_speed')
-            alt_resolution = request.form.get('alt_resolution')
-            az_resolution = request.form.get('az_resolution')
-            alt_reverse =  request.form.get('alt_reverse', 'false') != 'false'
-            az_reverse = request.form.get('az_reverse', 'false') != 'false'
+        # elif form_id == 'location_modify_form':
+        #     encoder_driver = request.form.get('encoder_driver')
+        #     serial_port = request.form.get('serial_port')
+        #     serial_speed = request.form.get('serial_speed')
+        #     alt_resolution = request.form.get('alt_resolution')
+        #     az_resolution = request.form.get('az_resolution')
+        #     alt_reverse =  request.form.get('alt_reverse', 'false') != 'false'
+        #     az_reverse = request.form.get('az_reverse', 'false') != 'false'
 
-            logging.info(f'{encoder_driver} {serial_port} {serial_speed} '
-                         f'{alt_resolution} {az_resolution} '
-                         f'{alt_reverse} {az_reverse}')
+        #     logging.info(f'{encoder_driver} {serial_port} {serial_speed} '
+        #                  f'{alt_resolution} {az_resolution} '
+        #                  f'{alt_reverse} {az_reverse}')
 
-            if None in [encoder_driver, serial_port, serial_speed,
-                        alt_resolution, az_resolution, alt_reverse,
-                        az_reverse]:
-                logging.error('post_device_setup_handler: Missing required fields!')
-                return render_template('modify_profile.html',
-                                       body_html='post_device_setup_handler: Missing '
-                                                 'required fields!<br><p><a href="setup">'
-                                                 'Return to setup page</a>')
+        #     if None in [encoder_driver, serial_port, serial_speed,
+        #                 alt_resolution, az_resolution, alt_reverse,
+        #                 az_reverse]:
+        #         logging.error('post_device_setup_handler: Missing required fields!')
+        #         return render_template('modify_profile.html',
+        #                                body_html='post_device_setup_handler: Missing '
+        #                                          'required fields!<br><p><a href="setup">'
+        #                                          'Return to setup page</a>')
 
-            error_resp = ''
+        #     error_resp = ''
 
-            if encoder_driver not in ['DaveEk']:
-                error_resp += f'<br>Driver {encoder_driver} is not valid.<br>'
-                error_resp += 'Valid choice is "DaveEk"'
+        #     if encoder_driver not in ['DaveEk']:
+        #         error_resp += f'<br>Driver {encoder_driver} is not valid.<br>'
+        #         error_resp += 'Valid choice is "DaveEk"'
 
-            try:
-                alt_resolution_value = int(alt_resolution)
-                az_resolution_value = int(az_resolution)
-                serial_speed_value = int(serial_speed)
-            except:
-                error_resp += '<br>Error - alt_resolution, az_resolution and '
-                error_resp += 'serial_speed require integer values!'
+        #     try:
+        #         alt_resolution_value = int(alt_resolution)
+        #         az_resolution_value = int(az_resolution)
+        #         serial_speed_value = int(serial_speed)
+        #     except:
+        #         error_resp += '<br>Error - alt_resolution, az_resolution and '
+        #         error_resp += 'serial_speed require integer values!'
 
-            if len(error_resp) > 0:
-                logging.error('post_device_setup_handler: {error_resp}')
-                error_resp += '<br><a href="setup">Return to setup page</a>'
-                return render_template('modify_profile.html', body_html=error_resp)
+        #     if len(error_resp) > 0:
+        #         logging.error('post_device_setup_handler: {error_resp}')
+        #         error_resp += '<br><a href="setup">Return to setup page</a>'
+        #         return render_template('modify_profile.html', body_html=error_resp)
 
-            profile.encoders.encoder_driver = encoder_driver
-            profile.encoders.serial_port = serial_port
-            profile.encoders.serial_speed = serial_speed_value
-            profile.encoders.alt_resolution = alt_resolution_value
-            profile.encoders.az_resolution = az_resolution_value
-            profile.encoders.alt_reverse = alt_reverse
-            profile.encoders.az_reverse = az_reverse
-            logging.info(f'profile before write: {profile}')
+        #     profile.encoders.encoder_driver = encoder_driver
+        #     profile.encoders.serial_port = serial_port
+        #     profile.encoders.serial_speed = serial_speed_value
+        #     profile.encoders.alt_resolution = alt_resolution_value
+        #     profile.encoders.az_resolution = az_resolution_value
+        #     profile.encoders.alt_reverse = alt_reverse
+        #     profile.encoders.az_reverse = az_reverse
+        #     logging.info(f'profile before write: {profile}')
 
-            profile.write()
+        #     profile.write()
         else:
             logging.error('post_device_setup_handler: unknown form_id!')
             render_template('modify_profile.html',
@@ -657,7 +688,7 @@ class AltAzSettingCircles(AlpacaBaseDevice):
 
         self.connected = True
 
-        print('self.encoders = ', self.encoders)
+        #print('self.encoders = ', self.encoders)
         return True
 
     def disconnect(self):

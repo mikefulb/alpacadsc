@@ -84,7 +84,7 @@ class AlpacaBaseDevice:
         elif action == 'driverinfo':
             resp['Value'] = self.driverinfo
         elif action == 'driverversion':
-            resp['Value'] = self.driverversion
+            resp['Value'] = self.driver_version
         elif action == 'interfaceversion':
             resp['Value'] = self.interface_version
         elif action == 'name':
@@ -146,13 +146,12 @@ class AlpacaBaseDevice:
         resp['ErrorString'] = ''
 
         if action == 'connected':
-            try:
-                state_string = forms['Connected']
-                logging.debug(f'connected state_string = {state_string} requested')
-            except KeyError:
+            state_string = forms.get('Connected')
+            if state_string is None:
                 logging.error('missing value for Connected')
                 resp['ErrorNumber'] = ALPACA_ERROR_INVALIDVALUE
             else:
+                logging.debug(f'connected state_string = {state_string} requested')
                 if state_string not in ['True', 'true', 'False', 'false']:
                     logging.error(f'invalid value for Connected: {state_string}')
                     resp['ErrorNumber'] = ALPACA_ERROR_INVALIDVALUE
@@ -160,9 +159,15 @@ class AlpacaBaseDevice:
                     state = state_string in ['true', 'True']
                     logging.debug(f'connected state {state} requested')
                     if state:
-                        self.connect()
+                        rc = self.connect()
                     else:
-                        self.disconnect()
+                        rc = self.disconnect()
+
+                    if not rc:
+                        func = 'Connect' if state else 'Disconnect'
+                        logging.error(f'rc = {rc} for action {func}')
+                        resp['ErrorNumber'] = ALPACA_ERROR_INVALIDVALUE
+                        resp['ErrorString'] = f'{func} attempt failed'
         else:
             resp['ErrorNumber'] = ALPACA_ERROR_NOTIMPLEMENTED
 
