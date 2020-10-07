@@ -13,6 +13,7 @@ AlpacaDSCDriver's documentation
    usage
    modules
    design
+   tests
 
 
 Indices and tables

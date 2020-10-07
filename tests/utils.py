@@ -32,6 +32,15 @@ from consts import *
 
 # create a test profile
 def create_test_profile(name='Test'):
+    """
+    Construct a driver profile for testing.
+
+    :param name: DESCRIPTION, defaults to 'Test'
+    :type name: TYPE, optional
+    :return: DESCRIPTION
+    :rtype: TYPE
+
+    """
     profile = Profile(PROFILE_BASENAME, f'{name}.yaml')
     profile.location.longitude = 135.0
     profile.location.latitude = 45.0
@@ -52,6 +61,7 @@ def create_test_profile(name='Test'):
 
 def mock_encoder_and_read_values(client, mocker, mock_alt, mock_az):
     """
+    Mock values read by encoder simulator driver for testing purposes.
 
     :param client: Flask test client object created with test_client()
     :type client: FlaskClient
@@ -105,6 +115,10 @@ def mock_encoder_and_read_values(client, mocker, mock_alt, mock_az):
 
 
 class REST_Handler:
+    """
+    Create a conduit for sending REST API commands to the driver for testing.
+    """
+
     def __init__(self, client, base_uri):
         self.client = client
         self.base_uri = base_uri
@@ -113,7 +127,12 @@ class REST_Handler:
 
     def get(self, action, data=None):
         """
-        data can be dict() which will be added as query string for GET action.
+        Perform a GET action API call.
+
+        :param action: Action name to be performed.
+        :type client: str
+        :param data: Option data to be added to query string, defaults to 'None'.
+        :type data: dict
         """
         rv = self.client.get(self.base_uri + '/' + action,
                              query_string=data)
@@ -123,7 +142,12 @@ class REST_Handler:
 
     def put(self, action, data=None):
         """
-        data can be dict() which will be added as data for PUT action.
+        Perform a PUT action API call.
+
+        :param action: Action name to be performed.
+        :type client: str
+        :param data: Option data to be added to PUT, defaults to 'None'.
+        :type data: dict
         """
         headers = {'content-type': 'application/x-www-form-urlencoded'}
         rv = self.client.put(self.base_uri + '/' + action,
