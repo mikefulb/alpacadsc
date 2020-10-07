@@ -5,17 +5,12 @@
 # Invocation:  Run from the root directory of AlpacaDSCDriver git checkout:
 #              python -m pytest -v tests/
 #
-#import sys
 import pytest
 from pathlib import Path
 
-# FIXME - better way to do this?  Want to be able to run the tests in a
-#         checked out source tree
-#sys.path.append('..')
-
 from AlpacaDSCDriver.AlpacaDeviceServer import AlpacaDeviceServer
 from AlpacaDSCDriver.AltAzSettingCircles import AltAzSettingCircles, PROFILE_BASENAME
-from AlpacaDSCDriver.Profiles import find_profiles, set_current_profile, get_current_profile
+from AlpacaDSCDriver.Profiles import find_profiles, get_current_profile
 from AlpacaDSCDriver.AltAzSettingCirclesProfile import AltAzSettingCirclesProfile as Profile
 
 # assume templates are in AlpacaDSCDriver module
@@ -23,20 +18,17 @@ from AlpacaDSCDriver.AltAzSettingCirclesProfile import AltAzSettingCirclesProfil
 import AlpacaDSCDriver.StartService
 templates_path = Path(AlpacaDSCDriver.StartService.__file__).resolve().parent
 
-ROOT_URI = '/'
-ABOUT_URI = '/about'
-GLOBAL_SETUP_URI = '/setup'
-MONITOR_ENCODER_URL = '/encoders'
-DRIVER_SETUP_URI = '/setup/v1/telescope/0/setup'
+from consts import ROOT_URI, GLOBAL_SETUP_URI, MONITOR_ENCODER_URL
+from consts import DRIVER_SETUP_URI, ABOUT_URI
+
 
 @pytest.fixture
 def client():
+    """ Create test client for testing Flask app """
     api_server = AlpacaDeviceServer(AltAzSettingCircles())
 
     # push context so GET/POST will work
     api_server.app.app_context().push()
-
-    #print(api_server.app.config)
 
     with api_server.app.test_client() as client:
         yield client
@@ -44,8 +36,10 @@ def client():
     # do cleanup here
     pass
 
+
 @pytest.fixture
 def my_fs(fs):
+    """ Add Flask temlates path as exception to fake fs """
     fs.add_real_directory(templates_path)
     yield fs
 
@@ -60,26 +54,32 @@ def my_fs(fs):
 # These tests will verify the URL rules were setup properly for the
 # Flask app and that the templates were located and rendered.
 #
+
+
 def test_root(client):
     """ Test '/' - should redirect to '/setup/ """
     rv = client.get(ROOT_URI)
     assert b'You should be redirected automatically ' \
            b'to target URL: <a href="/setup">/setup</a>' in rv.data
 
+
 def test_global_setup(client):
     """ Test '/setup' - should return server info page """
     rv = client.get(GLOBAL_SETUP_URI)
     assert b'Alt/Az Setting Circles Alpaca Server Information' in rv.data
+
 
 def test_driver_setup(client):
     """ Test '/setup/v1/telescope/0/setup' - should return driver setup page """
     rv = client.get(DRIVER_SETUP_URI)
     assert b'Alt/Az Setting Circles Driver Setup' in rv.data
 
+
 def test_monitor_encoders(client):
     """ Test '/encoders' - should return monitor encoders page """
     rv = client.get(MONITOR_ENCODER_URL)
     assert b'Alt/Az Setting Circles Driver Monitor Encoders' in rv.data
+
 
 def test_about(client):
     """ Test '/about' - should return about page """
@@ -96,19 +96,21 @@ def test_about(client):
 # pages will still render properly.
 #
 
-# Test: New Profile POST
-#
-# Test consists of:
-#
-#  - Using POST to simulate the request when the 'New Profile' button
-#     is pressed on the driver setup page.
-#  - Verify the profile file is created in the fake filesystem
-#  - Verify the new profile shows up via the find_profiles() API call
-#  - Verify the current profile is set to the new profile using the
-#     get_current_profile() API call
-#  - Load the new profile and verify it has the correct entries
+
 def test_new_profile(client, my_fs, name='NewProfile'):
-    """ Test creating a new profile """
+    """
+    Test: New Profile POST
+
+    Test consists of:
+
+      - Using POST to simulate the request when the 'New Profile' button
+         is pressed on the driver setup page.
+      - Verify the profile file is created in the fake filesystem
+      - Verify the new profile shows up via the find_profiles() API call
+      - Verify the current profile is set to the new profile using the
+        get_current_profile() API call
+      - Load the new profile and verify it has the correct entries
+    """
     rv = client.post(DRIVER_SETUP_URI, data=dict(
                      form_id='new_profile_form',
                      new_profile_id=name))
@@ -136,16 +138,18 @@ def test_new_profile(client, my_fs, name='NewProfile'):
               'alt_resolution', 'az_reverse', 'az_resolution']:
         assert k in profile._to_dict()['encoders']
 
-#
-# Test: Change Profile Page Render/Select Profile POST
-#
-# Test consists of:
-#  - Create 2 new profiles - Test1 and Test2
-#  - Verify Test2 is current profile
-#  - Request change profile page and verify
-#  - Call selected profile POST to switch profile to Test1
-#  - Verify Test1 is current profile
+
 def test_change_select_profile(client, my_fs):
+    """
+    Test: Change Profile Page Render/Select Profile POST
+
+    Test consists of:
+      - Create 2 new profiles - Test1 and Test2
+      - Verify Test2 is current profile
+      - Request change profile page and verify
+      - Call selected profile POST to switch profile to Test1
+      - Verify Test1 is current profile
+    """
     test_new_profile(client, my_fs, name='Test1')
     test_new_profile(client, my_fs, name='Test2')
     assert get_current_profile(PROFILE_BASENAME) == 'Test2'
@@ -165,14 +169,16 @@ def test_change_select_profile(client, my_fs):
 
     assert get_current_profile(PROFILE_BASENAME) == 'Test1'
 
-#
-# Test: Change Encoder Settings
-#
-# Test consists of:
-#  - Create new profiles Test1
-#  - Change encoder values via POST
-#  - Load driver setup page and verify new encoder values
+
 def test_change_encoder_settings(client, my_fs):
+    """
+    Test: Change Encoder Settings
+
+    Test consists of:
+      - Create new profiles Test1
+      - Change encoder values via POST
+      - Load driver setup page and verify new encoder values
+    """
     test_new_profile(client, my_fs, name='Test1')
 
     encoder_dict = dict(encoder_driver='DaveEk',
@@ -203,14 +209,16 @@ def test_change_encoder_settings(client, my_fs):
 
     assert new_encoder_dict == encoder_dict
 
-#
-# Test: Change Location Settings
-#
-# Test consists of:
-#  - Create new profiles Test1
-#  - Change location values via POST
-#  - Load driver setup page and verify new location values
+
 def test_change_location_settings(client, my_fs):
+    """
+    Test: Change Location Settings
+
+    Test consists of:
+      - Create new profiles Test1
+      - Change location values via POST
+      - Load driver setup page and verify new location values
+    """
     test_new_profile(client, my_fs, name='Test1')
 
     location_dict = dict(name='Observatory',

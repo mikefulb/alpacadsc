@@ -1,7 +1,9 @@
 #
 # Utilty functions for test suite
 #
-
+from collections import namedtuple
+from lxml import html
+from ast import literal_eval
 
 from AlpacaDSCDriver import __version__ as AlpacaDSCDriver_Version
 from AlpacaDSCDriver.AlpacaDeviceServer import AlpacaDeviceServer
@@ -9,6 +11,7 @@ from AlpacaDSCDriver.AltAzSettingCircles import AltAzSettingCircles,  PROFILE_BA
 from AlpacaDSCDriver.AltAzSettingCirclesProfile import AltAzSettingCirclesProfile as Profile
 from AlpacaDSCDriver.Profiles import find_profiles, set_current_profile, get_current_profile
 
+from consts import *
 
 # create a test profile
 def create_test_profile(name='Test'):
@@ -29,6 +32,60 @@ def create_test_profile(name='Test'):
     set_current_profile(PROFILE_BASENAME, name)
 
     return profile
+
+def mock_encoder_and_read_values(client, mocker, mock_alt, mock_az):
+    """
+
+    :param client: Flask test client object created with test_client()
+    :type client: FlaskClient
+    :param mock_alt: Encoder altitude raw counts to be mocked
+    :type mock_alt: int
+    :param mock_az: Encoder azimuth raw counts to be mocked
+    :type mock_az: int
+    :return: Named tuple containing read values.
+    :rtype: namedtuple('EncoderReadValues')
+
+    Fields of the namedtupled returned are:
+        - enc_alt : Altitude encoder raw counts
+        - enc_az : Altitude encoder raw counts
+        - sky_alt : Actual altitude in degrees (if synced)
+        - sky_az : Actual azimuth in degrees (if synced)
+        - ra_deg : Actual RA in degrees (if synced)
+        - dec_deg : Actual DEC in degrees (if synced)
+
+    """
+    mocker.patch(
+        'AlpacaDSCDriver.EncodersAltAzSimulator.EncodersAltAzSimulator.get_encoder_position',
+        return_value=(mock_alt, mock_az))
+
+    rv = client.get(MONITOR_ENCODER_URL)
+    assert b'Alt/Az Setting Circles Driver Monitor Encoders' in rv.data
+
+    # parse encoder values from HTML
+    root = html.fromstring(rv.data)
+    element = root.get_element_by_id(('Connected'))
+    connected = element.text == 'True'
+    assert connected is True
+
+    element = root.get_element_by_id(('ALTAZ_Counts'))
+    enc_alt, enc_az = literal_eval((element.text))
+
+    element = root.get_element_by_id(('ALTAZ_Degrees'))
+    try:
+        sky_alt, sky_az = literal_eval((element.text))
+    except TypeError:
+        sky_alt, sky_az = None, None
+
+    element = root.get_element_by_id(('RADEC_Degrees'))
+    try:
+        ra_deg, dec_deg = literal_eval((element.text))
+    except TypeError:
+        ra_deg, dec_deg = None, None
+
+    tup = namedtuple('EncoderReadValues', ['enc_alt', 'enc_az',
+                     'sky_alt', 'sky_az', 'ra_deg', 'dec_deg'])
+    return tup(enc_alt, enc_az, sky_alt, sky_az, ra_deg, dec_deg)
+
 
 class REST_Handler:
     def __init__(self, client, base_uri):

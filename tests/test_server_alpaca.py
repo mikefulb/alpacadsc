@@ -7,20 +7,13 @@
 #
 
 import pytest
-import logging
-
-logging.basicConfig(level=logging.DEBUG)
-mylogger = logging.getLogger()
-
 from AlpacaDSCDriver import __version__ as AlpacaDSCDriver_Version
 from AlpacaDSCDriver.AlpacaDeviceServer import AlpacaDeviceServer
-from AlpacaDSCDriver.AltAzSettingCircles import AltAzSettingCircles,  PROFILE_BASENAME
-from AlpacaDSCDriver.AltAzSettingCirclesProfile import AltAzSettingCirclesProfile as Profile
-from AlpacaDSCDriver.Profiles import find_profiles, set_current_profile, get_current_profile
+from AlpacaDSCDriver.AltAzSettingCircles import AltAzSettingCircles
 
+from consts import REST_API_URI
 from utils import create_test_profile, REST_Handler
 
-REST_API_URI = '/api/v1/telescope/0'
 
 @pytest.fixture
 def client():
@@ -29,28 +22,22 @@ def client():
     # push context so GET/POST will work
     api_server.app.app_context().push()
 
-    #print(api_server.app.config)
-
     with api_server.app.test_client() as client:
         yield client
 
     # do cleanup here
     pass
 
+
 @pytest.fixture
 def my_fs(fs):
     yield fs
 
 
-
-#
-# Test REST API
-#
-
-#
-# Test GET operations
-#
 def test_rest_get_basic(client):
+    """
+    Test Alpaca GET API common to all drivers.
+    """
 
     # get a driver object and compare attributes to those
     # returned by a REST API call
@@ -84,10 +71,10 @@ def test_rest_get_basic(client):
     assert isinstance(rv.json['Value'], bool)
 
 
-#
-# Test connected PUT call
-#
 def test_rest_connected(client, my_fs):
+    """
+    Test connecting to the driver.
+    """
     # create a profile
     create_test_profile()
 
@@ -113,4 +100,4 @@ def test_rest_connected(client, my_fs):
     # confirm PUT worked
     rv = rest.get('connected')
     assert isinstance(rv.json['Value'], bool)
-    assert rv.json['Value'] == False
+    assert rv.json['Value'] is False
