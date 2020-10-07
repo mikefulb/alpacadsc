@@ -18,8 +18,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-import os
-import sys
+
 import time
 import logging
 import argparse
@@ -42,6 +41,7 @@ def parse_command_line():
     logging.debug(f'cmd args = {args}')
     return args
 
+
 def runapp(args):
 
     logging.info(f'AlpacaDSCDriver version {version} starting...')
@@ -56,6 +56,7 @@ def runapp(args):
 
     while True:
         time.sleep(1)
+
 
 def main():
     # FIXME assumes tz is set properly in system?
@@ -92,10 +93,6 @@ def main():
 
     runapp(cmd_args)
 
+
 if __name__ == '__main__':
     main()
-
-
-
-
-

@@ -774,7 +774,7 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         obs_time = Time.now()
 
         newaltaz = SkyCoord(alt=sky_alt*u.deg, az=sky_az*u.deg, obstime=obs_time,
-                            frame = 'altaz', location=self.earth_location)
+                            frame='altaz', location=self.earth_location)
 
         cur_radec = newaltaz.transform_to('icrs')
         logging.info('current ra/dec = {cur_radec}')

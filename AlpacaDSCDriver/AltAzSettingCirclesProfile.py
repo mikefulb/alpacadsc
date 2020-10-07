@@ -21,6 +21,7 @@ from dataclasses import dataclass
 
 from .Profiles import Profile, ProfileSection
 
+
 class AltAzSettingCirclesProfile(Profile):
 
     @dataclass
@@ -64,11 +65,11 @@ class AltAzSettingCirclesProfile(Profile):
         super().read()
 
     def _data_complete(self):
-        l = [self.location.obsname,
-             self.location.latitude,
-             self.location.longitude,
-             self.location.altitudee]
-        return (l.count(None) == 0)
+        values = [self.location.obsname,
+                  self.location.latitude,
+                  self.location.longitude,
+                  self.location.altitudee]
+        return (values.count(None) == 0)
 
     def __getattr__(self, attr):
         return super().__getattribute__(attr)

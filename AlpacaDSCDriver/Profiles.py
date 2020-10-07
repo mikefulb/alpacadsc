@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import yaml
 
+
 def get_base_config_dir():
     """
     Find base path for where to store config files depending on platform.
@@ -39,6 +40,7 @@ def get_base_config_dir():
         raise FileNotFoundError
     return basedir
 
+
 def find_profiles(loc):
     """
     Return list of existing profiles in given location loc.  The location loc is
@@ -55,6 +57,7 @@ def find_profiles(loc):
     config_path = get_base_config_dir() / loc
     config_files = config_path.glob('*.yaml')
     return sorted(x.name for x in config_files if x.name != 'current_profile.yaml')
+
 
 def set_current_profile(loc, current_profile_name):
     """
@@ -79,6 +82,7 @@ def set_current_profile(loc, current_profile_name):
         yaml.dump(dataobj, stream=yaml_f, default_flow_style=False)
 
     return True
+
 
 def get_current_profile(loc):
     """
@@ -113,6 +117,7 @@ class ProfileSection(object):
     set of key/value pairs.  Multiple ProfileSection's can be added to a
     Profile to give parameters different namespaces in the Profile.'
     """
+
     def _property_keys(self):
         """
         Return a list of the property names in this ProfileSection.
@@ -170,7 +175,6 @@ class ProfileSection(object):
             val = default
         return val
 
-
     def __repr__(self):
         """
         Returns string representation of ProfileSection
@@ -188,6 +192,7 @@ class ProfileSection(object):
             i += 1
         s += ')'
         return s
+
 
 class Profile:
 

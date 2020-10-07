@@ -19,6 +19,7 @@
 #
 import logging
 
+
 class EncodersAltAzSimulator:
 
     def __init__(self, res_alt=4000, res_az=4000, reverse_alt=False, reverse_az=False):

@@ -59,6 +59,10 @@ setup(
 
     extras_require={}, # Optional
 
+    setup_requires=['flake8', 'pytest-runner'],
+
+    tests_require=['pytest', 'pytest-flask', 'pyfakefs'],
+
     package_data={}, #{'': 'docs/build/html/*'},# Optional
 
     include_package_data = True,

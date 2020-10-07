@@ -27,17 +27,18 @@ ALPACA_ERROR_UNSPECIFIEDERRROR = 0x800404FF
 ALPACA_ERROR_INVALIDVALUE = 0x80040401
 
 ALPACA_ERROR_STRINGS = {
-                         ALPACA_ERROR_NOTIMPLEMENTED : 'Method not implemented',
-                         ALPACA_ERROR_INVALIDOPERATION : 'Invalid operation requested',
-                         ALPACA_ERROR_NOTCONNECTED : 'Not connected',
-                         ALPACA_ERROR_UNSPECIFIEDERRROR : 'Unspecified error',
-                         ALPACA_ERROR_INVALIDVALUE : 'Invalid value'
+                         ALPACA_ERROR_NOTIMPLEMENTED:'Method not implemented',
+                         ALPACA_ERROR_INVALIDOPERATION:'Invalid operation requested',
+                         ALPACA_ERROR_NOTCONNECTED:'Not connected',
+                         ALPACA_ERROR_UNSPECIFIEDERRROR:'Unspecified error',
+                         ALPACA_ERROR_INVALIDVALUE:'Invalid value'
                        }
 
 # alignment modes
 ALPACA_ALIGNMENT_ALTAZ = 0
 ALPACA_ALIGNMENT_POLAR = 1
 ALPACA_ALIGNMENT_GERMANPOLAR = 2
+
 
 class AlpacaBaseDevice:
     """
@@ -97,7 +98,7 @@ class AlpacaBaseDevice:
                 resp['ErrorNumber'] = ALPACA_ERROR_NOTIMPLEMENTED
         else:
             # try with any registered handlers
-            #if self.custom_get_handler is not None:
+            # if self.custom_get_handler is not None:
             #    resp = self.custom_get_handler()
             resp['ErrorNumber'] = ALPACA_ERROR_NOTIMPLEMENTED
 
