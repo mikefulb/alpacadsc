@@ -1,4 +1,4 @@
-tests
+Tests
 =====
 
 Test cases

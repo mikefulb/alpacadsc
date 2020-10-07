@@ -26,6 +26,14 @@ The resulting package can be installed with:
 
 where <bdist_file> will be the newly created package in the "dist/" folder.
 
+Other options available are:
+
+ - python3 setup.py build_sphinx
+       This will rebuild the documentation into the directory docs/build/html.
+
+ - python3 setup.py test
+       This will run several tests.
+
 Starting The Alpaca Service
 ...........................
 You will need to start the Alpaca service which will
