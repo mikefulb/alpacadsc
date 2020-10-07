@@ -33,7 +33,7 @@ from .AlpacaBaseDevice import ALPACA_ERROR_NOTIMPLEMENTED
 from .Profiles import find_profiles, set_current_profile, get_current_profile
 from .AltAzSettingCirclesProfile import AltAzSettingCirclesProfile as Profile
 from .EncodersAltAzDaveEk import EncodersAltAzDaveEk
-from .EncodersAltAzSimulator import EncodersAltAzSimulated
+from .EncodersAltAzSimulator import EncodersAltAzSimulator
 
 from flask import request, render_template
 
@@ -205,7 +205,7 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             self.encoders.connect(encoders_profile.serial_port,
                                   speed=encoders_profile.serial_speed)
         elif encoder_drv == 'Simulator':
-            self.encoders = EncodersAltAzSimulated(res_alt=encoders_profile.alt_resolution,
+            self.encoders = EncodersAltAzSimulator(res_alt=encoders_profile.alt_resolution,
                                                    res_az=encoders_profile.az_resolution,
                                                    reverse_alt=encoders_profile.alt_reverse,
                                                    reverse_az=encoders_profile.az_reverse)

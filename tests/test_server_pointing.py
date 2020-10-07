@@ -6,20 +6,23 @@
 #              python -m pytest -v tests/
 #
 
-import pytest
 import logging
+import pytest
+from ast import literal_eval
+from lxml import html
+from collections import namedtuple
+from astropy.time import Time
+from astropy import units as u
+from astropy.coordinates import EarthLocation, SkyCoord
 
-logging.basicConfig(level=logging.DEBUG)
-mylogger = logging.getLogger()
-
-from AlpacaDSCDriver import __version__ as AlpacaDSCDriver_Version
 from AlpacaDSCDriver.AlpacaDeviceServer import AlpacaDeviceServer
-from AlpacaDSCDriver.AltAzSettingCircles import AltAzSettingCircles,  PROFILE_BASENAME
-from AlpacaDSCDriver.AltAzSettingCirclesProfile import AltAzSettingCirclesProfile as Profile
-from AlpacaDSCDriver.Profiles import find_profiles, set_current_profile, get_current_profile
+from AlpacaDSCDriver.AltAzSettingCircles import AltAzSettingCircles
+
+from utils import create_test_profile, REST_Handler
 
 REST_API_URI = '/api/v1/telescope/0'
-ENCODERS_URI = '/encoders'
+MONITOR_ENCODER_URL = '/encoders'
+
 
 @pytest.fixture
 def client():
@@ -28,156 +31,221 @@ def client():
     # push context so GET/POST will work
     api_server.app.app_context().push()
 
-    #print(api_server.app.config)
-
     with api_server.app.test_client() as client:
         yield client
 
     # do cleanup here
     pass
 
+
 @pytest.fixture
 def my_fs(fs):
     yield fs
 
 
-# create a test profile
-def _create_test_profile(name='Test'):
-    profile = Profile(PROFILE_BASENAME, f'{name}.yaml')
-    profile.location.longitude = 135.0
-    profile.location.latitude = 45.0
-    profile.location.altitude = 100.0
-    profile.location.obsname = 'Test Location'
-    profile.encoders.driver = 'Simulator'
-    profile.encoders.serial_port = '/dev/ttyUSB0'
-    profile.encoders.serial_speed = 9600
-    profile.encoders.alt_resolution = 10000
-    profile.encoders.az_resolution = 10000
-    profile.encoders.alt_reverse = False
-    profile.encoders.az_reverse = False
-    profile.write()
+def test_encoders_endpoint(client, mocker):
+    """
+    Test '/encoders' endpoint and verify it displays the raw encoders count
+    properly.
 
-    set_current_profile(PROFILE_BASENAME, name)
-
-    return profile
-
-
-
-#
-# Test '/encoders' endpoint
-#
-def test_encoders_endpoint(client):
-
-    # get a driver object and compare attributes to those
-    # returned by a REST API call
-    altaz_driver = AltAzSettingCircles()
-
-    trans_id = 0
-    get_dict = dict(ClientID=1,
-                    ClientTransactionID=trans_id)
-
-    # description
-    rv = client.get(REST_API_URI + '/description', query_string=get_dict)
-    assert altaz_driver.description == rv.json['Value']
-
-    get_dict['ClientTransactionID'] += 1
-
-    # name
-    rv = client.get(REST_API_URI + '/name', query_string=get_dict)
-    assert altaz_driver.name == rv.json['Value']
-
-    get_dict['ClientTransactionID'] += 1
-
-    # driverinfo
-    rv = client.get(REST_API_URI + '/driverinfo', query_string=get_dict)
-    assert altaz_driver.driverinfo == rv.json['Value']
-
-    get_dict['ClientTransactionID'] += 1
-
-    # driver version
-    rv = client.get(REST_API_URI + '/driverversion', query_string=get_dict)
-    assert f'{AlpacaDSCDriver_Version}' == rv.json['Value']
-
-    get_dict['ClientTransactionID'] += 1
-
-    # interface version
-    rv = client.get(REST_API_URI + '/interfaceversion', query_string=get_dict)
-    assert altaz_driver.interface_version == rv.json['Value']
-
-    get_dict['ClientTransactionID'] += 1
-
-    # connected
-    rv = client.get(REST_API_URI + '/connected', query_string=get_dict)
-    assert rv.status_code == 200
-    assert isinstance(rv.json['Value'], bool)
-
-
-
-
-
-#
-# Test connected PUT call
-#
-def test_rest_connected(client, my_fs):
-
-
+    """
     # create a profile
-    _create_test_profile()
+    create_test_profile()
 
-    trans_id = 0
-
-    # get current state
-    get_dict = dict(ClientID=1,
-                    ClientTransactionID=trans_id)
-    trans_id += 1
-    rv = client.get(REST_API_URI + '/connected', query_string=get_dict)
-    assert rv.status_code == 200
-    assert rv.json['ErrorNumber'] == 0
-    assert isinstance(rv.json['Value'], bool)
-    assert rv.json['Value'] is False
+    # create handler for sending REST requests
+    rest = REST_Handler(client, REST_API_URI)
 
     # connect
-    put_dict = dict(Connected=True,
-                    ClientID=1,
-                    ClientTransactionID=trans_id)
-    trans_id += 1
-
-    # connect
-    headers = {'content-type': 'application/x-www-form-urlencoded'}
-    rv = client.put(REST_API_URI + '/connected', data=put_dict,
-                    headers=headers)
-    assert rv.status_code == 200
-    assert rv.json['ErrorNumber'] == 0
+    rv = rest.put('connected', data=dict(Connected=True))
 
     # confirm PUT worked
-    get_dict = dict(ClientID=1,
-                    ClientTransactionID=trans_id)
-    trans_id += 1
-    rv = client.get(REST_API_URI + '/connected', query_string=get_dict)
-    assert rv.status_code == 200
-    assert rv.json['ErrorNumber'] == 0
+    rv = rest.get('connected')
     assert isinstance(rv.json['Value'], bool)
     assert rv.json['Value'] is True
 
-    # disconnect
-    put_dict = dict(Connected=False,
-                    ClientID=1,
-                    ClientTransactionID=trans_id)
-    trans_id += 1
+    # test encoder page
+    test_enc_alt = 1000
+    test_enc_az = 2000
+    mocker.patch(
+        'AlpacaDSCDriver.EncodersAltAzSimulator.EncodersAltAzSimulator.get_encoder_position',
+        return_value=(test_enc_alt, test_enc_az))
+
+    rv = client.get(MONITOR_ENCODER_URL)
+    assert b'Alt/Az Setting Circles Driver Monitor Encoders' in rv.data
+
+    # parse encoder values from HTML
+    root = html.fromstring(rv.data)
+    element = root.get_element_by_id(('Connected'))
+    connected = element.text == 'True'
+    assert connected is True
+
+    element = root.get_element_by_id(('ALTAZ_Counts'))
+    enc_alt, enc_az = literal_eval((element.text))
+    assert (enc_alt, enc_az) == (test_enc_alt, test_enc_az)
+
+
+def test_encoders_sync(client, mocker):
+    """
+    Test synchronizing driver and alt/az and ra/dec mapping for
+    different encoder positions relative to original.
+    """
+
+    def mock_encoder_and_read_values(client, mock_alt, mock_az):
+        mocker.patch(
+            'AlpacaDSCDriver.EncodersAltAzSimulator.EncodersAltAzSimulator.get_encoder_position',
+            return_value=(mock_alt, mock_az))
+
+        rv = client.get(MONITOR_ENCODER_URL)
+        assert b'Alt/Az Setting Circles Driver Monitor Encoders' in rv.data
+
+        # parse encoder values from HTML
+        root = html.fromstring(rv.data)
+        element = root.get_element_by_id(('Connected'))
+        connected = element.text == 'True'
+        assert connected is True
+
+        element = root.get_element_by_id(('ALTAZ_Counts'))
+        enc_alt, enc_az = literal_eval((element.text))
+
+        element = root.get_element_by_id(('ALTAZ_Degrees'))
+        try:
+            sky_alt, sky_az = literal_eval((element.text))
+        except TypeError:
+            sky_alt, sky_az = None, None
+
+        element = root.get_element_by_id(('RADEC_Degrees'))
+        try:
+            ra_deg, dec_deg = literal_eval((element.text))
+        except TypeError:
+            ra_deg, dec_deg = None, None
+
+        tup = namedtuple('EncoderReadValues', ['enc_alt', 'enc_az',
+                         'sky_alt', 'sky_az', 'ra_deg', 'dec_deg'])
+        return tup(enc_alt, enc_az, sky_alt, sky_az, ra_deg, dec_deg)
+
+    # how close must float value be to be considered the same
+    TEST_EPSILON = 0.1
+
+    # create a profile
+    test_profile = create_test_profile()
+
+    # setup earth location
+    location = EarthLocation(lat=test_profile.location.latitude,
+                             lon=test_profile.location.longitude,
+                             height=test_profile.location.altitude*u.m)
+
+    # create handler for sending REST requests
+    rest = REST_Handler(client, REST_API_URI)
 
     # connect
-    headers = {'content-type': 'application/x-www-form-urlencoded'}
-    rv = client.put(REST_API_URI + '/connected', data=put_dict,
-                    headers=headers)
-    assert rv.status_code == 200
-    assert rv.json['ErrorNumber'] == 0
+    rv = rest.put('connected', data=dict(Connected=True))
 
     # confirm PUT worked
-    get_dict = dict(ClientID=1,
-                    ClientTransactionID=trans_id)
-    trans_id += 1
-    rv = client.get(REST_API_URI + '/connected', query_string=get_dict)
-    assert rv.status_code == 200
-    assert rv.json['ErrorNumber'] == 0
+    rv = rest.get('connected')
     assert isinstance(rv.json['Value'], bool)
-    assert rv.json['Value'] == False
+    assert rv.json['Value'] is True
+
+    # test encoder page
+    test_enc_alt = 1000
+    test_enc_az = 1000
+    # mocker.patch(
+    #     'AlpacaDSCDriver.EncodersAltAzSimulator.EncodersAltAzSimulator.get_encoder_position',
+    #     return_value=(test_enc_alt, test_enc_az))
+
+    # rv = client.get(MONITOR_ENCODER_URL)
+    # assert b'Alt/Az Setting Circles Driver Monitor Encoders' in rv.data
+
+    # # parse encoder values from HTML
+    # root = html.fromstring(rv.data)
+    # element = root.get_element_by_id(('Connected'))
+    # connected = element.text == 'True'
+    # assert connected is True
+
+    # element = root.get_element_by_id(('ALTAZ_Counts'))
+    # enc_alt, enc_az = literal_eval((element.text))
+
+    values = mock_encoder_and_read_values(client, test_enc_alt, test_enc_az)
+    assert (values.enc_alt, values.enc_az) == (test_enc_alt, test_enc_az)
+
+    #
+    # given profile lat/lon and current time pick raw counts for encoders
+    # and actual alt/az values in sky.   Using time and location convert actual
+    # alt/az to ra/dec to send for synchronize command
+    #
+    sync_enc_alt = 1000
+    sync_enc_az = 1000
+    sync_sky_alt = 45.0
+    sync_sky_az = 90.0
+    mocker.patch(
+        'AlpacaDSCDriver.EncodersAltAzSimulator.EncodersAltAzSimulator.get_encoder_position',
+        return_value=(sync_enc_alt, sync_enc_az))
+
+    # get ra/dec for sky alt/az chosen
+    # create SkyCoord and convert to RA/DEC
+    obs_time = Time.now()
+
+    cur_altaz = SkyCoord(alt=sync_sky_alt*u.deg, az=sync_sky_az*u.deg,
+                         obstime=obs_time, frame='altaz', location=location)
+    cur_radec = cur_altaz.transform_to('icrs')
+
+    # sync
+    # we have RA/DEC in decimal degrees, sync expects RA as decimal hours
+    # and DEC as decimal degrees so need to convert RA
+    rv = rest.put('synctocoordinates', data=dict(RightAscension=cur_radec.ra.hour,
+                                                 Declination=cur_radec.dec.degree))
+
+    # # read RA/DEC and ALT/AZ from monitor page
+    # rv = client.get(MONITOR_ENCODER_URL)
+    # assert b'Alt/Az Setting Circles Driver Monitor Encoders' in rv.data
+
+    # # parse encoder values from HTML
+    # root = html.fromstring(rv.data)
+    # element = root.get_element_by_id(('Connected'))
+    # connected = element.text == 'True'
+    # assert connected is True
+
+    # element = root.get_element_by_id(('ALTAZ_Degrees'))
+    # act_sky_alt, act_sky_az = literal_eval((element.text))
+
+    # element = root.get_element_by_id(('RADEC_Degrees'))
+    # act_ra_deg, act_dec_deg = literal_eval((element.text))
+
+    # test if close enough to true values
+    values = mock_encoder_and_read_values(client, sync_enc_alt, sync_enc_az)
+
+    assert abs(values.sky_alt - sync_sky_alt) < TEST_EPSILON
+    assert abs(values.sky_az - sync_sky_az) < TEST_EPSILON
+    assert abs(values.ra_deg - cur_radec.ra.deg) < TEST_EPSILON
+    assert abs(values.dec_deg - cur_radec.dec.deg) < TEST_EPSILON
+
+    # now move the mount in alt/az counts
+    delta_alt = 1000
+    delta_az = 1000
+    mocker.patch(
+        'AlpacaDSCDriver.EncodersAltAzSimulator.EncodersAltAzSimulator.get_encoder_position',
+        return_value=(sync_enc_alt+delta_alt, sync_enc_az+delta_az))
+
+    # read RA/DEC and ALT/AZ from monitor page
+    rv = client.get(MONITOR_ENCODER_URL)
+    assert b'Alt/Az Setting Circles Driver Monitor Encoders' in rv.data
+
+    # parse encoder values from HTML
+    root = html.fromstring(rv.data)
+    element = root.get_element_by_id(('Connected'))
+    connected = element.text == 'True'
+    assert connected is True
+
+    element = root.get_element_by_id(('ALTAZ_Degrees'))
+    act_sky_alt, act_sky_az = literal_eval((element.text))
+    print(act_sky_alt, act_sky_az)
+
+    new_alt = (sync_sky_alt+360.0*delta_alt/test_profile.encoders.alt_resolution)
+    new_az = (sync_sky_az+360.0*delta_az/test_profile.encoders.az_resolution)
+    print(new_alt, new_az)
+    assert abs(act_sky_alt - new_alt) < TEST_EPSILON
+    assert abs(act_sky_az - new_az) < TEST_EPSILON
+
+    element = root.get_element_by_id(('RADEC_Degrees'))
+    act_ra_deg, act_dec_deg = literal_eval((element.text))
+
+

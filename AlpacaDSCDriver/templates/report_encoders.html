@@ -13,23 +13,28 @@ Alt/Az Setting Circles Driver Encoders Monitor
     values to be reported.
     <p>
     <br>
-    <table>
+    <table id="ResultsTable">
         <tr>
             <td>Connected:</td>
-            <td>{{ driver.connected }}</td>
+            <td id="Connected">{{ driver.connected }}</td>
         </tr>
         {% if driver.encoders is not none %}
             <tr>
                 <td>Encoder ALT/AZ Counts: </td>
-                <td>{{ driver.encoders.get_encoder_position() }}</td>
+                <td id="ALTAZ_Counts">{{ driver.encoders.get_encoder_position() }}</td>
             </tr>
             <tr>
                 <td>DSC ALT/AZ: </td>
-                <td>{{ driver.get_current_altaz() }}</td>
+                <td id="ALTAZ_Degrees">{{ driver.get_current_altaz() }}</td>
             </tr>
             <tr>
                 <td>DSC RA/DEC: </td>
-                <td>{{ driver.get_current_radec() }}</td>
+                {% set radec = driver.get_current_radec() %}
+                {% if radec is not none %}
+                <td id="RADEC_Degrees">({{ radec.ra.deg }}, {{ radec.dec.deg }})</td>
+                {% else %}
+                <td id="RADEC_Degrees">None</td>
+                {% endif %}
             </tr>
     </table>
         {% else %}

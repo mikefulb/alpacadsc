@@ -28,6 +28,8 @@ def create_test_profile(name='Test'):
 
     set_current_profile(PROFILE_BASENAME, name)
 
+    return profile
+
 class REST_Handler:
     def __init__(self, client, base_uri):
         self.client = client

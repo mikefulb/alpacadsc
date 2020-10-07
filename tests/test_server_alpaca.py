@@ -104,7 +104,6 @@ def test_rest_connected(client, my_fs):
 
     # confirm PUT worked
     rv = rest.get('connected')
-
     assert isinstance(rv.json['Value'], bool)
     assert rv.json['Value'] is True
 
