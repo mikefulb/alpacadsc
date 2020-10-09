@@ -26,8 +26,8 @@ import argparse
 from datetime import datetime
 
 from . import __version__ as version
-from .AlpacaDeviceServer import AlpacaDeviceServer
-from .AltAzSettingCircles import AltAzSettingCircles as TelescopeDevice
+from .deviceserver import AlpacaDeviceServer
+from .altaz_dsc import AltAzSettingCircles as TelescopeDevice
 
 
 def parse_command_line():
@@ -46,7 +46,7 @@ def parse_command_line():
 
 def runapp(args):
 
-    logging.info(f'AlpacaDSCDriver version {version} starting...')
+    logging.info(f'Alpaca DSC Driver version {version} starting...')
 
     # create alpaca device object
     device = TelescopeDevice(args.profile)
@@ -62,7 +62,7 @@ def runapp(args):
 
 def main():
     # FIXME assumes tz is set properly in system?
-    logfilename = 'AlpacaDSCDriver'
+    logfilename = 'alpacadsc'
     logfilename += '-' + datetime.now().strftime('%Y%m%d%H%M%S')
     logfilename += '.log'
 

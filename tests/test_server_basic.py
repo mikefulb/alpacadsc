@@ -2,7 +2,7 @@
 # Test Flask App Basic Functionality
 #
 #
-# Invocation:  Run from the root directory of AlpacaDSCDriver git checkout:
+# Invocation:  Run from the root directory of alpacadsc git checkout:
 #              python -m pytest -v tests/
 #
 # Copyright 2020 Michael Fulbright
@@ -25,18 +25,18 @@
 import pytest
 from pathlib import Path
 
-from AlpacaDSCDriver.AlpacaDeviceServer import AlpacaDeviceServer
-from AlpacaDSCDriver.AltAzSettingCircles import AltAzSettingCircles, PROFILE_BASENAME
-from AlpacaDSCDriver.Profiles import find_profiles, get_current_profile
-from AlpacaDSCDriver.AltAzSettingCirclesProfile import AltAzSettingCirclesProfile as Profile
-
-# assume templates are in AlpacaDSCDriver module
-# import a module and find __file__
-import AlpacaDSCDriver.StartService
-templates_path = Path(AlpacaDSCDriver.StartService.__file__).resolve().parent
+from alpacadsc.deviceserver import AlpacaDeviceServer
+from alpacadsc.altaz_dsc import AltAzSettingCircles, PROFILE_BASENAME
+from alpacadsc.profiles import find_profiles, get_current_profile
+from alpacadsc.altaz_dsc_profile import AltAzSettingCirclesProfile as Profile
 
 from consts import ROOT_URI, GLOBAL_SETUP_URI, MONITOR_ENCODER_URL
 from consts import DRIVER_SETUP_URI, ABOUT_URI
+
+# assume templates are in alpacadsc module
+# import a module and find __file__
+import alpacadsc.startservice
+templates_path = Path(alpacadsc.startservice.__file__).resolve().parent
 
 
 @pytest.fixture
@@ -135,7 +135,7 @@ def test_new_profile(client, my_fs, name='NewProfile'):
     assert b'Profile ' + name.encode('utf-8') + \
            b' created and set as current.' in rv.data
 
-    config_path = Path.home() / '.config' / 'AlpacaDSCDriver' / f'{name}.yaml'
+    config_path = Path.home() / '.config' / 'alpacadsc' / f'{name}.yaml'
     assert config_path.exists()
 
     profiles = find_profiles(PROFILE_BASENAME)

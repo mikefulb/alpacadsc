@@ -20,25 +20,26 @@
 #import os
 import logging
 from pathlib import Path
+
+from flask import request, render_template
 import serial.tools.list_ports as list_serial_ports
 from astropy.coordinates import EarthLocation, AltAz, SkyCoord
 from astropy.time import Time
 from astropy import units as u
 
-from . import __version__ as AlpacaDSCDriver_Version
-from .AlpacaBaseDevice import AlpacaBaseDevice
-from .AlpacaBaseDevice import ALPACA_ALIGNMENT_ALTAZ
-from .AlpacaBaseDevice import ALPACA_ERROR_STRINGS
-from .AlpacaBaseDevice import ALPACA_ERROR_NOTIMPLEMENTED
-from .Profiles import find_profiles, set_current_profile, get_current_profile
-from .AltAzSettingCirclesProfile import AltAzSettingCirclesProfile as Profile
-from .EncodersAltAzDaveEk import EncodersAltAzDaveEk
-from .EncodersAltAzSimulator import EncodersAltAzSimulator
+from . import __version__ as ALPACADSC_VERSION
+from .basedevice import AlpacaBaseDevice
+from .basedevice import ALPACA_ALIGNMENT_ALTAZ
+from .basedevice import ALPACA_ERROR_STRINGS
+from .basedevice import ALPACA_ERROR_NOTIMPLEMENTED
+from .profiles import find_profiles, set_current_profile, get_current_profile
+from .altaz_dsc_profile import AltAzSettingCirclesProfile as Profile
+from .encoders_altaz_serialdsc import EncodersAltAzSerialDSC
+from .encoders_altaz_simulator import EncodersAltAzSimulator
 
-from flask import request, render_template
 
 # base name used for profile storage
-PROFILE_BASENAME = "AlpacaDSCDriver"
+PROFILE_BASENAME = "alpacadsc"
 
 class AltAzSettingCircles(AlpacaBaseDevice):
     """
@@ -51,7 +52,7 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         super().__init__()
 
         # driver info
-        self.driver_version = AlpacaDSCDriver_Version
+        self.driver_version = ALPACADSC_VERSION
         self.description = 'Alt/Az Setting Circles'
         self.driverinfo = self.description + f' V. {self.driver_version}'
         self.name = 'AltAzSettingCircles'
@@ -193,7 +194,7 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             return False
 
         if encoder_drv == 'DaveEk':
-            self.encoders = EncodersAltAzDaveEk(
+            self.encoders = EncodersAltAzSerialDSC(
                                     res_alt=encoders_profile.alt_resolution,
                                     res_az=encoders_profile.az_resolution,
                                     reverse_alt=encoders_profile.alt_reverse,

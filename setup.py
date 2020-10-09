@@ -9,11 +9,11 @@ here = pathlib.Path(__file__).parent.resolve()
 long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 # get version
-from AlpacaDSCDriver import __version__ as AlpacaDSCDriver_Version
+from alpacadsc import __version__ as AlpacaDSCDriver_Version
 
 setup(
 
-    name='AlpacaDSCDriver',  # Required
+    name='alpacadsc',  # Required
 
     version=AlpacaDSCDriver_Version,  # Required
 
@@ -23,7 +23,7 @@ setup(
 
     long_description_content_type='text/markdown',  # Optional (see note above)
 
-    url='https://github.com/msf/AlpacaDSCDriver',  # Optional
+    url='https://github.com/msf/alpacadsc',  # Optional
 
     author='Michael Fulbright',  # Optional
 
@@ -51,7 +51,7 @@ setup(
 
     package_dir={},  # Optional
 
-    packages=find_packages(include=['AlpacaDSCDriver']),  # Required
+    packages=find_packages(include=['alpacadsc']),  # Required
 
     python_requires='>=3.7, <4',
 
@@ -74,7 +74,7 @@ setup(
 
     entry_points={  # Optional
         'console_scripts': [
-            'AlpacaDSCDriver = AlpacaDSCDriver.StartService:main',
+            'alpacadsc = alpacadsc.startservice:main',
         ],
     },
 

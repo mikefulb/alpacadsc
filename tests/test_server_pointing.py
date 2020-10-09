@@ -2,7 +2,7 @@
 # Test Encoders And Synchronization
 #
 #
-# Invocation:  Run from the root directory of AlpacaDSCDriver git checkout:
+# Invocation:  Run from the root directory of alpacadsc git checkout:
 #              python -m pytest -v tests/
 #
 # Copyright 2020 Michael Fulbright
@@ -27,8 +27,8 @@ from astropy.time import Time
 from astropy import units as u
 from astropy.coordinates import EarthLocation, SkyCoord
 
-from AlpacaDSCDriver.AlpacaDeviceServer import AlpacaDeviceServer
-from AlpacaDSCDriver.AltAzSettingCircles import AltAzSettingCircles
+from alpacadsc.deviceserver import AlpacaDeviceServer
+from alpacadsc.altaz_dsc import AltAzSettingCircles
 
 from consts import REST_API_URI
 from utils import create_test_profile, REST_Handler

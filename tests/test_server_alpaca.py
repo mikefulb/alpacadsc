@@ -2,7 +2,7 @@
 # Test Alpaca REST API
 #
 #
-# Invocation:  Run from the root directory of AlpacaDSCDriver git checkout:
+# Invocation:  Run from the root directory of alpacadsc git checkout:
 #              python -m pytest -v tests/
 #
 # Copyright 2020 Michael Fulbright
@@ -23,9 +23,9 @@
 #
 
 import pytest
-from AlpacaDSCDriver import __version__ as AlpacaDSCDriver_Version
-from AlpacaDSCDriver.AlpacaDeviceServer import AlpacaDeviceServer
-from AlpacaDSCDriver.AltAzSettingCircles import AltAzSettingCircles
+from alpacadsc import __version__ as AlpacaDSCDriver_Version
+from alpacadsc.deviceserver import AlpacaDeviceServer
+from alpacadsc.altaz_dsc import AltAzSettingCircles
 
 from consts import REST_API_URI
 from utils import create_test_profile, REST_Handler

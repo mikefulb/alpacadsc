@@ -22,11 +22,10 @@ from collections import namedtuple
 from lxml import html
 from ast import literal_eval
 
-from AlpacaDSCDriver import __version__ as AlpacaDSCDriver_Version
-from AlpacaDSCDriver.AlpacaDeviceServer import AlpacaDeviceServer
-from AlpacaDSCDriver.AltAzSettingCircles import AltAzSettingCircles,  PROFILE_BASENAME
-from AlpacaDSCDriver.AltAzSettingCirclesProfile import AltAzSettingCirclesProfile as Profile
-from AlpacaDSCDriver.Profiles import find_profiles, set_current_profile, get_current_profile
+from alpacadsc.deviceserver import AlpacaDeviceServer
+from alpacadsc.altaz_dsc import AltAzSettingCircles,  PROFILE_BASENAME
+from alpacadsc.altaz_dsc_profile import AltAzSettingCirclesProfile as Profile
+from alpacadsc.profiles import find_profiles, set_current_profile, get_current_profile
 
 from consts import *
 
@@ -82,7 +81,7 @@ def mock_encoder_and_read_values(client, mocker, mock_alt, mock_az):
 
     """
     mocker.patch(
-        'AlpacaDSCDriver.EncodersAltAzSimulator.EncodersAltAzSimulator.get_encoder_position',
+        'alpacadsc.encoders_altaz_simulator.EncodersAltAzSimulator.get_encoder_position',
         return_value=(mock_alt, mock_az))
 
     rv = client.get(MONITOR_ENCODER_URL)

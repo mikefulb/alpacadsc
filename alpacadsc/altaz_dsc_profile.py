@@ -19,40 +19,40 @@
 #
 from dataclasses import dataclass
 
-from .Profiles import Profile, ProfileSection
+from .profiles import Profile, ProfileSection
 
 
 class AltAzSettingCirclesProfile(Profile):
 
     @dataclass
     class Location(ProfileSection):
-        _sectionname : str = 'location'
+        _sectionname: str = 'location'
         #: Name of observing location
-        obsname : str = None
+        obsname: str = None
         #: Latitude in degrees
-        latitude : float = None
+        latitude: float = None
         #: Longitude in degrees
-        longitude : float = None
+        longitude: float = None
         #: Altitude in meters
-        altitude : float = None
+        altitude: float = None
 
     @dataclass
     class Encoders(ProfileSection):
-        _sectionname : str = 'encoders'
+        _sectionname: str = 'encoders'
         # driver
-        driver : str = None
+        driver: str = None
         # serial port
-        serial_port : str = None
+        serial_port: str = None
         # speed
-        serial_speed : int = 9600
+        serial_speed: int = 9600
         #: Alt axis resolution
-        alt_resolution : int = None
+        alt_resolution: int = None
         #: AZ axis resolution
-        az_resolution : int = None
+        az_resolution: int = None
         #: Reverse ALT?
-        alt_reverse : bool = False
+        alt_reverse: bool = False
         #: Reverse AZ?
-        az_reverse : bool = False
+        az_reverse: bool = False
 
     def __init__(self, reldir, name=None):
         super().__init__(reldir, name)
