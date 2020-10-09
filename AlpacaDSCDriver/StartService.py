@@ -34,6 +34,8 @@ def parse_command_line():
     parser = argparse.ArgumentParser()
     parser.add_argument('--profile', type=str, help='Name of astro profile')
     parser.add_argument('--listprofiles', action='store_true', help='List known profiles')
+    parser.add_argument('--port', type=int, default=8000,
+                        help='TCP Port Alpaca server will listen on.')
     parser.add_argument('--debug', action='store_true', help='Set log level DEBUG')
     parser.add_argument('--simul', action='store_true', help='Run as simulation')
 
@@ -50,7 +52,7 @@ def runapp(args):
     device = TelescopeDevice(args.profile)
 
     # start api server
-    api_server = AlpacaDeviceServer(device)
+    api_server = AlpacaDeviceServer(device, port=args.port)
     api_server.start()
     logging.info('Alpaca API server for encoders started')
 

@@ -55,13 +55,15 @@ setup(
 
     python_requires='>=3.7, <4',
 
-    install_requires=['Flask>=1.1'],  # Optional
+    install_requires=['Flask>=1.1',
+                      'astropy>=1.10',
+                      'pyserial>=3'],  # Optional
 
     extras_require={}, # Optional
 
-    setup_requires=['flake8', 'pytest-runner'],
+    setup_requires=['flake8', 'pytest-runner', 'astropy'],
 
-    tests_require=['pytest', 'pytest-flask', 'pyfakefs'],
+    tests_require=['pytest', 'pytest-flask', 'pyfakefs', 'astropy'],
 
     package_data={}, #{'': 'docs/build/html/*'},# Optional
 

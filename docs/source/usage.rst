@@ -37,7 +37,16 @@ Other options available are:
 Starting The Alpaca Service
 ...........................
 You will need to start the Alpaca service which will
-allow software to connect with your setting circles.  The command to do this is:
+allow software to connect with your setting circles.  The command to do this
+on Linux is:
+
+    AlpacaDSCDriver
+
+and on Windows would be:
+
+    AlpacaDSCDriver.exe
+
+You can also start the service by invoking the module via python:
 
     python -m AlpacaDSCDriver.StartService
 
