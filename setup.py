@@ -57,7 +57,8 @@ setup(
 
     install_requires=['Flask>=1.1',
                       'astropy>=1.10',
-                      'pyserial>=3'],  # Optional
+                      'pyserial>=3',
+                      'pyyaml>=5.3'],  # Optional
 
     extras_require={}, # Optional
 
