@@ -12,7 +12,7 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../AlpacaDSCDriver'))
+sys.path.insert(0, os.path.abspath('../../alpacadsc'))
 sys.path.insert(0, os.path.abspath('../../tests'))
 sys.path.insert(0, os.path.abspath('../../'))
 
@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('../../'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'AlpacaDSCDriver'
+project = 'alpacadsc'
 copyright = '2020, Michael Fulbright'
 author = 'Michael Fulbright'
 
@@ -33,8 +33,8 @@ author = 'Michael Fulbright'
 extensions = [
         'sphinx.ext.autodoc',
         'sphinx.ext.autosummary',
+        'sphinx.ext.autosectionlabel',
         'sphinx.ext.napoleon'
-
 ]
 
 # disable Google style (use NumPy)

@@ -40,15 +40,15 @@ You will need to start the Alpaca service which will
 allow software to connect with your setting circles.  The command to do this
 on Linux is:
 
-    AlpacaDSCDriver
+    alpacadsc
 
 and on Windows would be:
 
-    AlpacaDSCDriver.exe
+    alpacadsc.exe
 
 You can also start the service by invoking the module via python:
 
-    python -m AlpacaDSCDriver.StartService
+    python -m alpacadsc.startservice
 
 The service will start and by default listens to the port 8000 on the local host.
 
@@ -101,8 +101,8 @@ Profiles are stored as YAML formatted files.  The location of the profile
 files depends on the platform:
 
 ======= ================================
-Linux   $(HOME)/.config/AlpacaDSCDriver
-Windows %APPDATA%/AlpacaDSCDriver
+Linux   $(HOME)/.config/alpacadsc
+Windows %APPDATA%/alpacadsc
 ======= ================================
 
 If you want to backup your settings or move them to another computer you can
@@ -207,15 +207,14 @@ permanent.  The button only saves the encoder settings.
 Using With Planetarium Software
 ...............................
 
-First start the AlpacaDSCDriver service with the command:
-
-    python -m AlpacaDSCDriver.StartService
+First start the Alpaca DSC driver service as shown in the section
+:ref:`Starting The Alpaca Service`.
 
 Then use your software to connect to the service.  The software must support
 Alpaca to work with this driver.  You will want to configure the server IP
 as 127.0.0.1 or "localhost" and the server port as 8000.
 
-Once connected to the AlpacaDSCDriver service the driver will still need to
+Once connected to the Alpaca DSC driver service the driver will still need to
 be synchronized with the sky before it can report the position of the telescope.
 This is done by finding a star in your planetarium program and then manually
 pushing the telescope so the same star is centered in the eyepiece.  Now use

@@ -1,69 +1,69 @@
-AlpacaDSCDriver package
+alpaca package
 =======================
 
 Submodules
 ----------
 
-AlpacaDSCDriver.AlpacaBaseDevice module
+alpacadsc.basedevice module
 ---------------------------------------
 
-.. automodule:: AlpacaDSCDriver.AlpacaBaseDevice
+.. automodule:: alpacadsc.basedevice
     :members:
     :undoc-members:
     :show-inheritance:
 
-AlpacaDSCDriver.AlpacaDeviceServer module
+alpacadsc.deviceserver module
 -----------------------------------------
 
-.. automodule:: AlpacaDSCDriver.AlpacaDeviceServer
+.. automodule:: alpacadsc.deviceserver
     :members:
     :undoc-members:
     :show-inheritance:
 
-AlpacaDSCDriver.AltAzSettingCircles module
+alpacadsc.altaz_dsc module
 ------------------------------------------
 
-.. automodule:: AlpacaDSCDriver.AltAzSettingCircles
+.. automodule:: alpacadsc.altaz_dsc
     :members:
     :undoc-members:
     :show-inheritance:
 
-AlpacaDSCDriver.AltAzSettingCirclesProfile module
+alpacadsc.altaz_dsc_profile module
 -------------------------------------------------
 
-.. automodule:: AlpacaDSCDriver.AltAzSettingCirclesProfile
+.. automodule:: alpacadsc.altaz_dsc_profile
     :members:
     :undoc-members:
     :show-inheritance:
 
-AlpacaDSCDriver.EncodersAltAzDaveEk module
+alpacadsc.encoders_altaz_serialdsc module
 ------------------------------------------
 
-.. automodule:: AlpacaDSCDriver.EncodersAltAzDaveEk
+.. automodule:: alpacadsc.encoders_altaz_serialdsc
     :members:
     :undoc-members:
     :show-inheritance:
 
-AlpacaDSCDriver.EncodersAltAzSimulator module
+alpacadsc.encoders_altaz_simulator module
 ---------------------------------------------
 
-.. automodule:: AlpacaDSCDriver.EncodersAltAzSimulator
+.. automodule:: alpacadsc.encoders_altaz_simulator
     :members:
     :undoc-members:
     :show-inheritance:
 
-AlpacaDSCDriver.Profiles module
+alpacadsc.profiles module
 -------------------------------
 
-.. automodule:: AlpacaDSCDriver.Profiles
+.. automodule:: alpacadsc.profiles
     :members:
     :undoc-members:
     :show-inheritance:
 
-AlpacaDSCDriver.StartService module
+alpacadsc.startservice module
 -----------------------------------
 
-.. automodule:: AlpacaDSCDriver.StartService
+.. automodule:: alpacadsc.startservice
     :members:
     :undoc-members:
     :show-inheritance:
@@ -72,7 +72,7 @@ AlpacaDSCDriver.StartService module
 Module contents
 ---------------
 
-.. automodule:: AlpacaDSCDriver
+.. automodule:: alpacadsc
     :members:
     :undoc-members:
     :show-inheritance:
