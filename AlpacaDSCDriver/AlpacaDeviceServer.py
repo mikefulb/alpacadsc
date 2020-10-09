@@ -60,40 +60,20 @@ class AlpacaDeviceServer(Thread):
             """
 
             resp = {}
-            # print('\nencpoint request method: ', request.method)
-            # print('encpoint request.args: ', request.args)
-            # print('encpoint request.environ: ', '\n'.join([f'{k}={v}' for k,v in request.environ.items()]))
-            # print('encpoint request.form: ', request.form)
-            # print('encpoint request.full_path: ', request.full_path)
-            # print('encpoint request.data: ', request.data)
-            # print('encpoint request.headers: ', request.headers)
-            # print('encpoint request.query_string: ', request.query_string)
-            # print('encpoint request.url : ', request.url)
             trans_id = request.args.get('ClientTransactionID')
             if trans_id is None:
                 logging.warning('request missing client transaction id!')
             else:
                 resp['ClientTransactionID'] = trans_id
 
-#            print('client trans id: ', trans_id)
-
-            # resp['ClientTransactionID'] = request.query['ClientTransactionID']
-            # except:
-            #     logging.warning('request missing client id!')
-
             resp['ServerTransactionID'] = self.outer.server_transaction_id
             self.outer.server_transaction_id += 1
 
             if self.method == 'PUT':
                 kwargs['forms'] = request.form
-            #import inspect
-            #print('calling handler', inspect.getmembers(self.handler))
-            # print('\n*args: ', args)
-            # print('**kwargs: ', kwargs)
+
             handler_resp = self.handler(*args, **kwargs)
-            # print('\nhandler_resp: ', handler_resp)
             if isinstance(handler_resp, str):
-                # print('\nreturning str')
                 return Response(handler_resp, status=200, headers={})
             else:
 
@@ -103,7 +83,6 @@ class AlpacaDeviceServer(Thread):
                 if self.method == 'GET':
                     resp['Value'] = handler_resp['Value']
 
-                # print('\nreturning something else')
                 return json.dumps(resp), 200, {'Content-Type' : 'application/json'}
 
 

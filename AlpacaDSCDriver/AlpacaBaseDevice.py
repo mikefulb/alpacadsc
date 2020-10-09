@@ -27,11 +27,11 @@ ALPACA_ERROR_UNSPECIFIEDERRROR = 0x800404FF
 ALPACA_ERROR_INVALIDVALUE = 0x80040401
 
 ALPACA_ERROR_STRINGS = {
-                         ALPACA_ERROR_NOTIMPLEMENTED:'Method not implemented',
-                         ALPACA_ERROR_INVALIDOPERATION:'Invalid operation requested',
-                         ALPACA_ERROR_NOTCONNECTED:'Not connected',
-                         ALPACA_ERROR_UNSPECIFIEDERRROR:'Unspecified error',
-                         ALPACA_ERROR_INVALIDVALUE:'Invalid value'
+                         ALPACA_ERROR_NOTIMPLEMENTED: 'Method not implemented',
+                         ALPACA_ERROR_INVALIDOPERATION: 'Invalid operation requested',
+                         ALPACA_ERROR_NOTCONNECTED: 'Not connected',
+                         ALPACA_ERROR_UNSPECIFIEDERRROR: 'Unspecified error',
+                         ALPACA_ERROR_INVALIDVALUE: 'Invalid value'
                        }
 
 # alignment modes

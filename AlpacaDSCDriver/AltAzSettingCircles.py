@@ -118,10 +118,6 @@ class AltAzSettingCircles(AlpacaBaseDevice):
     def load_profile(self, try_profile=None):
         # load profile
         # if profile was specified then try using it
-        # FIXME maybe need way to suggest a profile from command line?
-#        if use_profile is not None:
-#            try_profile = use_profile
-
         # if no suggestion for profile try to find last one used
         if try_profile is None:
             try_profile = get_current_profile(PROFILE_BASENAME)
@@ -129,7 +125,6 @@ class AltAzSettingCircles(AlpacaBaseDevice):
                 logging.info(f'Using current profile {try_profile}')
 
         if try_profile is None:
-            # FIXME probably shouldnt exit from init() - return exception?
             logging.error('Must specify a valid profile')
             return None, None
 
@@ -198,17 +193,19 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             return False
 
         if encoder_drv == 'DaveEk':
-            self.encoders = EncodersAltAzDaveEk(res_alt=encoders_profile.alt_resolution,
-                                                res_az=encoders_profile.az_resolution,
-                                                reverse_alt=encoders_profile.alt_reverse,
-                                                reverse_az=encoders_profile.az_reverse)
+            self.encoders = EncodersAltAzDaveEk(
+                                    res_alt=encoders_profile.alt_resolution,
+                                    res_az=encoders_profile.az_resolution,
+                                    reverse_alt=encoders_profile.alt_reverse,
+                                    reverse_az=encoders_profile.az_reverse)
             self.encoders.connect(encoders_profile.serial_port,
                                   speed=encoders_profile.serial_speed)
         elif encoder_drv == 'Simulator':
-            self.encoders = EncodersAltAzSimulator(res_alt=encoders_profile.alt_resolution,
-                                                   res_az=encoders_profile.az_resolution,
-                                                   reverse_alt=encoders_profile.alt_reverse,
-                                                   reverse_az=encoders_profile.az_reverse)
+            self.encoders = EncodersAltAzSimulator(
+                                    res_alt=encoders_profile.alt_resolution,
+                                    res_az=encoders_profile.az_resolution,
+                                    reverse_alt=encoders_profile.alt_reverse,
+                                    reverse_az=encoders_profile.az_reverse)
             self.encoders.connect(encoders_profile.serial_port,
                                   speed=encoders_profile.serial_speed)
         else:
@@ -247,10 +244,12 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         resp['ErrorNumber'] = 0
         resp['ErrorString'] = ''
 
-        if action in ['alignmentmode', 'aperturearea', #'altitude',
-                      'aperturediameter', 'athome',  'atpark', # 'azimuth',
+        if action in [
+                      'alignmentmode', 'aperturearea',
+                      'aperturediameter', 'athome',  'atpark',
                       'canfindhome', 'canpark', 'canpulseguide',
-                      'cansetdeclinationrate', 'cansetguiderates', 'cansetpark',
+                      'cansetdeclinationrate', 'cansetguiderates',
+                      'cansetpark',
                       'cansetpierside', 'cansetrightascensionrate',
                       'cansettracking', 'canslew', 'canslewaltaz',
                       'canslewaltazasync', 'canslewasync', 'cansync',
@@ -262,11 +261,9 @@ class AltAzSettingCircles(AlpacaBaseDevice):
                       'sitelongitude', 'slewing', 'slewsettletime',
                       'targetdeclination', 'targetrightascension',
                       'tracking', 'trackingrate', 'trackingrates', 'utcdate',
-                      'axisrates', 'canmoveaxis', 'destinationsideofpier']:
-            #try:
+                      'axisrates', 'canmoveaxis', 'destinationsideofpier'
+                     ]:
             resp['Value'] = getattr(self, action)
-
-                #resp['ErrorNumber'] = ALPACA_ERROR_NOTIMPLEMENTED
         elif action in ['altitude', 'azimuth']:
             altaz = self.get_current_altaz()
             if altaz is not None:
@@ -329,7 +326,8 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         resp['ErrorNumber'] = 0
         resp['ErrorString'] = ''
 
-        if action in ['declinationrate', 'doesrefraction',
+        if action in [
+                      'declinationrate', 'doesrefraction',
                       'guideratedeclinatoin', 'guideraterightascension',
                       'rightascensionrate', 'sideofpier', 'slewsettletime',
                       'targetdeclination', 'targetrightascension',
@@ -338,7 +336,8 @@ class AltAzSettingCircles(AlpacaBaseDevice):
                       'setpark', 'slewtoaltaz', 'slewtoaltazasync',
                       'slewtocoordinates', 'slewtocoordinatesasync',
                       'slewtotarget', 'slewtotargetasync', 'synctotarget',
-                      'unpark']:
+                      'unpark'
+                     ]:
             logging.error(f'Unimplemented telescope method {action} requested!')
             resp['ErrorNumber'] = ALPACA_ERROR_NOTIMPLEMENTED
         elif action == 'synctoaltaz':
@@ -453,12 +452,13 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         # do not accept changes while connected
         if self.connected:
             logging.error('post_device_setup_handler: request while connected!')
-            return render_template('modify_profile.html',
-                                   body_html='post_device_setup_handler: '
-                                             'Cannot send setup post requests '
-                                             'while device is connected!'
-                                             '<br><p><a href="setup">'
-                                             'Return to setup page</a>')
+            return render_template(
+                            'modify_profile.html',
+                            body_html='post_device_setup_handler: '
+                            'Cannot send setup post requests '
+                            'while device is connected!'
+                            '<br><p><a href="setup">'
+                            'Return to setup page</a>')
 
         # identify which form this is from
         form_id = request.form.get('form_id')
@@ -468,37 +468,41 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         if form_id == 'selected_profile_form':
             new_profile = request.form.get('profile_choice')
             set_current_profile(PROFILE_BASENAME, new_profile)
-            return render_template('modify_profile.html',
-                                   body_html=f'The profile {new_profile} is now '
-                                   'the current profile.<br><p><a href="setup">'
-                                   'Return to setup page</a>')
+            return render_template(
+                            'modify_profile.html',
+                            body_html=f'The profile {new_profile} is now '
+                            'the current profile.<br><p><a href="setup">'
+                            'Return to setup page</a>')
 
         # handle change current profile request
         if form_id == 'change_profile_form':
             profile_list = [Path(x).stem for x in find_profiles(PROFILE_BASENAME)]
-            return render_template('change_profile.html',
-                                   current_profile=get_current_profile(PROFILE_BASENAME),
-                                   profile_list=profile_list)
+            return render_template(
+                            'change_profile.html',
+                            current_profile=get_current_profile(PROFILE_BASENAME),
+                            profile_list=profile_list)
 
         # handle new profile request
         if form_id == 'new_profile_form':
             new_profile_id = request.form.get('new_profile_id')
             if new_profile_id is None or len(new_profile_id) < 1:
                 logging.error('post_device_setup_handler: invalid new_profile_id!')
-                return render_template('modify_profile.html',
-                                       body_html='post_device_setup_handler: '
-                                                 'invalid new profile id !<br><p><a href="setup">'
-                                                 'Return to setup page</a>')
+                return render_template(
+                            'modify_profile.html',
+                            body_html='post_device_setup_handler: '
+                            'invalid new profile id !<br><p><a href="setup">'
+                            'Return to setup page</a>')
 
             new_profile = profile = Profile(PROFILE_BASENAME,
                                             new_profile_id+ '.yaml')
             new_profile.write()
             set_current_profile(PROFILE_BASENAME, new_profile_id)
 
-            return render_template('new_profile.html',
-                                    body_html=f'Profile {new_profile_id} created and set as '
-                                              'current.<br><p><a href="setup">'
-                                              'Return to setup page</a>')
+            return render_template(
+                            'new_profile.html',
+                            body_html=f'Profile {new_profile_id} created and set as '
+                            'current.<br><p><a href="setup">'
+                            'Return to setup page</a>')
 
         # handle forms modifying an existing profile
 
@@ -512,10 +516,11 @@ class AltAzSettingCircles(AlpacaBaseDevice):
 
         if profile is None:
             logging.error('post_device_setup_handler: unknown profile_id!')
-            return render_template('modify_profile.html',
-                                   body_html='post_device_setup_handler: '
-                                   'unknown profile id !<br><p><a href="setup">'
-                                   'Return to setup page</a>')
+            return render_template(
+                            'modify_profile.html',
+                            body_html='post_device_setup_handler: '
+                            'unknown profile id !<br><p><a href="setup">'
+                            'Return to setup page</a>')
 
         logging.info(f'post_device_setup_handler: profile = {profile}')
 
@@ -536,10 +541,11 @@ class AltAzSettingCircles(AlpacaBaseDevice):
                         alt_resolution, az_resolution, alt_reverse,
                         az_reverse]:
                 logging.error('post_device_setup_handler: Encoder missing required fields!')
-                return render_template('modify_profile.html',
-                                       body_html='post_device_setup_handler: Encoder missing '
-                                                 'required fields!<br><p><a href="setup">'
-                                                 'Return to setup page</a>')
+                return render_template(
+                            'modify_profile.html',
+                            body_html='post_device_setup_handler: Encoder missing '
+                            'required fields!<br><p><a href="setup">'
+                            'Return to setup page</a>')
 
             error_resp = ''
 
@@ -572,7 +578,6 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             profile.write()
 
         elif form_id == 'location_modify_form':
-            #print(request.form)
             obsname = request.form.get('name')
             lat = request.form.get('latitude')
             lon = request.form.get('longitude')
@@ -582,10 +587,12 @@ class AltAzSettingCircles(AlpacaBaseDevice):
 
             if None in [obsname, lat, lon, alt]:
                 logging.error('post_device_setup_handler: Location missing required fields!')
-                return render_template('modify_profile.html',
-                                       body_html='post_device_setup_handler: Location missing '
-                                                 'required fields!<br><p><a href="setup">'
-                                                 'Return to setup page</a>')
+                return render_template(
+                        'modify_profile.html',
+                        body_html='post_device_setup_handler: Location missing'
+                        ' required fields!<br><p><a href="setup">'
+                        'Return to setup page</a>')
+
             error_resp = ''
 
             try:
@@ -593,6 +600,7 @@ class AltAzSettingCircles(AlpacaBaseDevice):
                 lon_value = float(lon)
                 alt_value = float(alt)
             except:
+                # FIXME - Need to replace bare except!
                 error_resp += '<br>Error - latitude, longitude and '
                 error_resp += 'altitude require float values!'
 
@@ -820,4 +828,3 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         self.syncpos_az = sync_altaz.az.degree
 
         return 0
-
