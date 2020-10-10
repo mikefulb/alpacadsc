@@ -6,7 +6,7 @@ Python implementation of an Alpaca drive for digital setting circles (DSC) conne
 Features
 ---------
 
- -Support for DSC using the "Dave Ek" serial protocol
+ - Support for DSC using the "Dave Ek" serial protocol
  - 1 star alignment/synchronization
  - Web based configuration of driver parameters
 
