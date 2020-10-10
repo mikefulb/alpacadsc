@@ -114,7 +114,6 @@ equipment.
 
 The configuration page is available by connecting a browser to:
 
-::
     http://localhost:8000/setup/v1/telescope/0/setup
 
 As a convenience if you connect to:
