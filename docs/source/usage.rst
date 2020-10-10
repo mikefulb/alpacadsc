@@ -3,36 +3,44 @@
 Usage
 *****
 
-Author: Michael Fulbright
-
-Contact: mike.fulbright@pobox.com
-
-Date: 2020-09-29
+.. highlight:: console
 
 Installation
 ............
 The Alpaca Digital Setting Circles Driver (ADSCD) can be installed from source.
 It supports setup.py so the package can be installed using the command:
 
+::
+
     python3 setup.py install
 
 Alternately a distribution package can be created with:
+
+::
 
     python3 setup.py bdist_wheel
 
 The resulting package can be installed with:
 
+::
+
     python3 -m pip install <bdist_file>
 
-where <bdist_file> will be the newly created package in the "dist/" folder.
+where `<bdist_file>` will be the newly created package in the "dist/" folder.
 
 Other options available are:
 
- - python3 setup.py build_sphinx
-       This will rebuild the documentation into the directory docs/build/html.
+ - Rebuilding the documentation into the directory docs/build/html.
 
- - python3 setup.py test
-       This will run several tests.
+   ::
+
+     python3 setup.py build_sphinx
+
+ - Run several tests on the code base.
+
+   ::
+
+     python3 setup.py test`
 
 Starting The Alpaca Service
 ...........................
@@ -40,17 +48,57 @@ You will need to start the Alpaca service which will
 allow software to connect with your setting circles.  The command to do this
 on Linux is:
 
+::
+
     alpacadsc
 
 and on Windows would be:
+
+::
 
     alpacadsc.exe
 
 You can also start the service by invoking the module via python:
 
+::
+
     python -m alpacadsc.startservice
 
 The service will start and by default listens to the port 8000 on the local host.
+
+.. warning::
+
+    The service will run a web server on your system that will listen for
+    incoming connections from Alpaca clients.  It should only
+    listen for connections from your local computer.  At this point `alpacdsc`
+    is still in development and such the test server built into Flask is being
+    used.  You will see a warning when you start the service that says this.
+    The intention long term is to move off the internal Flask server.
+
+Command Line Options
+""""""""""""""""""""
+
+The service accepts several command line options:
+
+.. program:: alpacadsc
+
+.. option:: --port port
+
+   Sets the port that the Alpaca service will listen to for client connections.
+   The default value is 8000.
+
+.. option:: --profile PROFILE
+
+   Use the configuration profile :strong:`PROFILE`.  If none is supplied then
+   the last profile used will be loaded.
+
+.. option:: --listprofiles
+
+   List all profiles which are currently defined.
+
+.. option:: --debug
+
+   Show additional debugging information in log file.
 
 
 Configuration
@@ -66,6 +114,7 @@ equipment.
 
 The configuration page is available by connecting a browser to:
 
+::
     http://localhost:8000/setup/v1/telescope/0/setup
 
 As a convenience if you connect to:
@@ -96,6 +145,9 @@ Select the checkbox for the profile you want to switch to and then click
 the "Change Profile" button.
 
 The current profile will automatically be loaded whenever the service is started.
+Optionally the `--profile` command line option can be used to specify the profile
+to be used.  To get a list of available profiles use the `--listprofiles` command
+line option.
 
 Profiles are stored as YAML formatted files.  The location of the profile
 files depends on the platform:
