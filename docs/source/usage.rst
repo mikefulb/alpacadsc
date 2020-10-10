@@ -100,6 +100,13 @@ The service accepts several command line options:
 
    Show additional debugging information in log file.
 
+Log File Output
+"""""""""""""""
+
+A log file will be created in the directory from which the service was started
+and has a filename of the format `alpacadsc-<dateime>.log` where
+`datetime` is a timestamp of when the service was started.  This file can be
+helpful when trying to track down problems or reporting an issue you may encounter.
 
 Configuration
 .............
