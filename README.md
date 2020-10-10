@@ -1,7 +1,12 @@
 alpacadsc
 ---------
 
-Python implementation of an Alpaca drive for digital setting circles (DSC) connected to an ALT/AZ mount like a dobsonian telescope.
+Python implementation of an Alpaca driver for digital setting circles
+(DSC) connected to an ALT/AZ mount like a dobsonian telescope.  With
+this driver you can use software (such as a planetarium program) that
+supports Alpaca to monitor the position of your telescope.  Using the
+Alpaca Remote Server you can also bridge this Alpaca driver over to
+software that expects a traditional ASCOM driver.
 
 Features
 ---------
@@ -9,6 +14,7 @@ Features
  - Support for DSC using the "Dave Ek" serial protocol
  - 1 star alignment/synchronization
  - Web based configuration of driver parameters
+ - Supports multiple telescope configurations
 
 Supported Platforms
 -------------------
