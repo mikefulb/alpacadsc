@@ -7,7 +7,7 @@ Usage
 
 Installation
 ............
-The Alpaca Digital Setting Circles Driver (ADSCD) can be installed from source.
+The Alpaca digital setting circles driver (:strong:`alpacadsc`) can be installed from source.
 It supports setup.py so the package can be installed using the command:
 
 ::

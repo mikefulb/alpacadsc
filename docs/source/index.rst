@@ -10,7 +10,9 @@ alpacadsc's documentation
    :maxdepth: 3
    :caption: Contents:
 
+   intro
    usage
+   drivers
    modules
    design
    tests
