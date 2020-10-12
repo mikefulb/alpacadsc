@@ -485,6 +485,7 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             available_ports = []
 
         output = render_template('device_setup_base.html', driver=self,
+                                 encoder_plugins=[n for n, m, c in self.encoders_plugins],
                                  profile=profile,
                                  profile_name=profile_name,
                                  profile_list=find_profiles(PROFILE_BASENAME),
@@ -595,9 +596,10 @@ class AltAzSettingCircles(AlpacaBaseDevice):
 
             error_resp = ''
 
-            if encoder_driver not in ['DaveEk']:
+            encoders_plugin_names = [n for n, m, c in self.encoders_plugins]
+            if encoder_driver not in encoders_plugin_names:
                 error_resp += f'<br>Driver {encoder_driver} is not valid.<br>'
-                error_resp += 'Valid choice is "DaveEk"'
+                error_resp += f'Valid choices are {" ".join( encoders_plugin_names)}.'
 
             try:
                 alt_resolution_value = int(alt_resolution)
@@ -608,7 +610,7 @@ class AltAzSettingCircles(AlpacaBaseDevice):
                 error_resp += 'serial_speed require integer values!'
 
             if len(error_resp) > 0:
-                logging.error('post_device_setup_handler: {error_resp}')
+                logging.error(f'post_device_setup_handler: {error_resp}')
                 error_resp += '<br><p><a href="setup">Return to setup page</a>'
                 return render_template('modify_profile.html', body_html=error_resp)
 

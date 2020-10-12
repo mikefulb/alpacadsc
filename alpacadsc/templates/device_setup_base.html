@@ -142,10 +142,19 @@ Alt/Az Setting Circles Driver Setup
                   <label for="encoder_driver">Driver</label>
                 </td>
                 <td>
-                  <input type="text" name="encoder_driver" value="{{profile.encoders.driver}}">
+                  <select name="encoder_driver">
+                    {% for n in encoder_plugins %}
+                    {% if n == profile.encoders.driver %}
+                    {% set selected = "selected" %}
+                    {% else %}
+                    {% set selected = "" %}
+                    {% endif %}
+                    <option value="{{n}}" {{selected}}>{{n}}</option>
+                    {% endfor %}
+                  </select>
                 </td>
                 <td>
-                  Available drivers: DaveEk
+                  Available drivers: {{' '.join(encoder_plugins)}}
                 </td>
               </tr>
               <tr>
@@ -153,7 +162,17 @@ Alt/Az Setting Circles Driver Setup
                   <label for="serial_port">Serial Port</label>
                 </td>
                 <td>
-                  <input type="text" name="serial_port" value="{{profile.encoders.serial_port}}">
+                  <select name="serial_port">
+                    {% for n in available_ports %}
+                    {{n}}<br>{{profile.encoders.serial_port}}<br>
+                    {% if n == profile.encoders.serial_port %}
+                    {% set selected = "selected" %}
+                    {% else %}
+                    {% set selected = "" %}
+                    {% endif %}
+                    <option value="{{n}}" {{selected}}>{{n}}</option>
+                    {% endfor %}
+                  </select>
                 </td>
                 <td>
                   COMn: on Windows or /dev/ttyUSBn or /dev/ttyACMn on Linux<br>
