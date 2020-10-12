@@ -58,7 +58,7 @@ class EncodersBase(metaclass=ABCMeta):
         Read the encoders resolution from the digital setting circles hardware.
 
         :returns:
-            (ttuple)  The resolution of the altitude and azimuth encoders.
+            (tuple)  The resolution of the altitude and azimuth encoders.
 
         """
         pass
@@ -69,7 +69,7 @@ class EncodersBase(metaclass=ABCMeta):
         Read the encoders resolution from the digital setting circles hardware.
 
         :returns:
-            (ttuple)  The position of the altitude and azimuth encoders.
+            (tuple)  The position of the altitude and azimuth encoders.
 
         """
         pass

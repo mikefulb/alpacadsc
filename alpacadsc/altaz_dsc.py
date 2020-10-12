@@ -46,7 +46,7 @@ from .profiles import find_profiles, set_current_profile, get_current_profile
 from .altaz_dsc_profile import AltAzSettingCirclesProfile as Profile
 
 # define named tuple for representing loaded encoders plugins
-Plugin = namedtuple('Plugin', ['name', 'module_', 'class_'])
+Plugin = namedtuple('Plugin', ['name', 'moduleref', 'classref'])
 
 # base name used for profile storage
 PROFILE_BASENAME = "alpacadsc"
@@ -130,7 +130,7 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         self.find_encoders_plugins()
 
         for p in self.encoders_plugins:
-            logging.info(f'Loaded encoder plugin {p.name}: {p.class_}.')
+            logging.info(f'Loaded encoder plugin {p.name}: {p.classref}.')
 
     def find_encoders_plugins(self):
         """

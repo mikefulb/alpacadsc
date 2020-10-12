@@ -36,10 +36,19 @@ alpacadsc.altaz_dsc_profile module
     :undoc-members:
     :show-inheritance:
 
-alpacadsc.encoders_altaz_serialdsc module
+alpacadsc.baseencoders module
 ------------------------------------------
 
-.. automodule:: alpacadsc.encoders_altaz_serialdsc
+.. automodule:: alpacadsc.baseencoders
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+alpacadsc.encoders_altaz_daveek module
+------------------------------------------
+
+.. automodule:: alpacadsc.encoders_altaz_daveek
     :members:
     :undoc-members:
     :show-inheritance:
