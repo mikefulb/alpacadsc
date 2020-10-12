@@ -19,7 +19,11 @@
 #
 #import os
 import logging
+import importlib
+import inspect
+import pkgutil
 from pathlib import Path
+from collections import namedtuple
 
 from flask import request, render_template
 import serial.tools.list_ports as list_serial_ports
@@ -27,16 +31,22 @@ from astropy.coordinates import EarthLocation, AltAz, SkyCoord
 from astropy.time import Time
 from astropy import units as u
 
+# import so we can walk all encoder plugins distributed with package
+import alpacadsc
+
+# get version
 from . import __version__ as ALPACADSC_VERSION
+
 from .basedevice import AlpacaBaseDevice
 from .basedevice import ALPACA_ALIGNMENT_ALTAZ
 from .basedevice import ALPACA_ERROR_STRINGS
 from .basedevice import ALPACA_ERROR_NOTIMPLEMENTED
+from .baseencoders import EncodersBase
 from .profiles import find_profiles, set_current_profile, get_current_profile
 from .altaz_dsc_profile import AltAzSettingCirclesProfile as Profile
-from .encoders_altaz_serialdsc import EncodersAltAzSerialDSC
-from .encoders_altaz_simulator import EncodersAltAzSimulator
 
+# define named tuple for representing loaded encoders plugins
+Plugin = namedtuple('Plugin', ['name', 'module_', 'class_'])
 
 # base name used for profile storage
 PROFILE_BASENAME = "alpacadsc"
@@ -45,6 +55,7 @@ class AltAzSettingCircles(AlpacaBaseDevice):
     """
     Driver for Alt/Az setting circles
     """
+
     def __init__(self, use_profile=None):
         """
         Initialize driver object.
@@ -115,6 +126,44 @@ class AltAzSettingCircles(AlpacaBaseDevice):
         self.enc_az0 = None
         self.syncpos_alt = None
         self.syncpos_az = None
+
+        self.find_encoders_plugins()
+
+        for p in self.encoders_plugins:
+            logging.info(f'Loaded encoder plugin {p.name}: {p.class_}.')
+
+    def find_encoders_plugins(self):
+        """
+        Searches for encoders drivers.
+
+        Drivers will have a name in the format "encoders_<drivername>"
+        and are located in the alpacadsc package, an example being
+        "encoders_altaz_simulator"
+
+        The path containing the alpacadsc package is scanned for
+        modules matching this pattern.  Then for each module it
+        is inspected to determine if it is an encoder driver.  The
+        signature for this is if the module contains a class that
+        is derived from the EncodersBase class.
+
+        The result will be to add an attribute to the object called
+        "encoders_plugins" which is a list of Plugins namedtuples which
+        contains the human readable name of the driver as well as
+        a reference to the important module and the class containing
+        the encoders driver.
+        """
+        self.encoders_plugins = []
+
+        plugins = {
+            name: importlib.import_module(f'alpacadsc.{name}')
+            for finder, name, ipkg
+            in pkgutil.iter_modules(alpacadsc.__path__)
+            if name.startswith('encoders_')}
+
+        for k, v in plugins.items():
+            for _, c in inspect.getmembers(v, inspect.isclass):
+                if issubclass(c, EncodersBase) and c is not EncodersBase:
+                    self.encoders_plugins.append(Plugin(c().name(), v, c))
 
     def load_profile(self, try_profile=None):
         # load profile
@@ -193,37 +242,33 @@ class AltAzSettingCircles(AlpacaBaseDevice):
             # FIXME Raise exception?
             return False
 
-        if encoder_drv == 'DaveEk':
-            self.encoders = EncodersAltAzSerialDSC(
-                                    res_alt=encoders_profile.alt_resolution,
-                                    res_az=encoders_profile.az_resolution,
-                                    reverse_alt=encoders_profile.alt_reverse,
-                                    reverse_az=encoders_profile.az_reverse)
-            self.encoders.connect(encoders_profile.serial_port,
-                                  speed=encoders_profile.serial_speed)
-        elif encoder_drv == 'Simulator':
-            self.encoders = EncodersAltAzSimulator(
-                                    res_alt=encoders_profile.alt_resolution,
-                                    res_az=encoders_profile.az_resolution,
-                                    reverse_alt=encoders_profile.alt_reverse,
-                                    reverse_az=encoders_profile.az_reverse)
-            self.encoders.connect(encoders_profile.serial_port,
-                                  speed=encoders_profile.serial_speed)
+        # scan encoders pluins for driver matching requested
+        encoder_class = None
+        for n, m, c in self.encoders_plugins:
+            logging.debug(f'scanning encoders plugin {n} matching {encoder_drv}.')
+            if n == encoder_drv:
+                logging.info(f'Loading encoders driver {n}.')
+                encoder_class = c
+                break
         else:
-            logging.error(f'Unknown encoder driver {encoder_drv} requested!')
+            logging.error(f'Requested encoders driver {encoder_drv} '
+                          f'could not be found!.')
             self.encoders = None
-            # FIXME Raise exception?
             return False
-#    if args.simul:
-#        encoders = EncodersAltAzSimulated(res_alt=profile.encoders.alt_resolution,
-#                             res_az=profile.encoders.az_resolution,
-#                             reverse_alt=profile.encoders.alt_reverse,
-#                             reverse_az=profile.encoders.az_reverse)
-#    else:
 
-
-        logging.info(f'Connected to encoders on port {encoders_profile.serial_port}')
-        return True
+        self.encoders = encoder_class(
+                                res_alt=encoders_profile.alt_resolution,
+                                res_az=encoders_profile.az_resolution,
+                                reverse_alt=encoders_profile.alt_reverse,
+                                reverse_az=encoders_profile.az_reverse)
+        if self.encoders.connect(encoders_profile.serial_port,
+                                 speed=encoders_profile.serial_speed):
+            logging.info(f'Connected to encoders on port {encoders_profile.serial_port}')
+            return True
+        else:
+            self.encoders = None
+            logging.info(f'Failed to connect to encoders on port {encoders_profile.serial_port}')
+            return False
 
     # handle device specific actions or pass to base
     def get_action_handler(self, action):

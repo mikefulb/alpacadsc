@@ -37,6 +37,7 @@ class AlpacaDeviceServer(Thread):
         Handler for endpoints - allows code reuse since all endpoints
         require similar handlers.
         """
+
         def __init__(self, outer, handler, method):
             """
 
@@ -62,7 +63,7 @@ class AlpacaDeviceServer(Thread):
             resp = {}
             trans_id = request.args.get('ClientTransactionID')
             if trans_id is None:
-                logging.warning('request missing client transaction id!')
+                logging.warning('Request missing client transaction id!')
             else:
                 resp['ClientTransactionID'] = trans_id
 
@@ -83,8 +84,7 @@ class AlpacaDeviceServer(Thread):
                 if self.method == 'GET':
                     resp['Value'] = handler_resp['Value']
 
-                return json.dumps(resp), 200, {'Content-Type' : 'application/json'}
-
+                return json.dumps(resp), 200, {'Content-Type': 'application/json'}
 
     def __init__(self, device, host='localhost', port=8000):
         """
@@ -133,7 +133,7 @@ class AlpacaDeviceServer(Thread):
                               view_func=self.redirect_root)
 
         # Specific setup for the actual device at '/setup' + _alpaca_url_base + '/setup'
-        logging.info(f"adding endpoint {'/setup' + _alpaca_url_base + '/setup'}")
+        logging.debug(f"Adding endpoint {'/setup' + _alpaca_url_base + '/setup'}")
         setup_func = self.EndpointHandler(self, self.device.get_device_setup_handler, 'GET')
         self.app.add_url_rule('/setup' + _alpaca_url_base + '/setup',
                               'GET_DEVICE_SETUP',
@@ -146,14 +146,14 @@ class AlpacaDeviceServer(Thread):
                               view_func=self.device.post_device_setup_handler)
 
         # add endpoint to simply read encoder values
-        logging.info(f"adding endpoint {'/encoders'}")
+        logging.debug(f"Adding endpoint {'/encoders'}")
         self.app.add_url_rule('/encoders',
                               'REPORT_ENCODERS',
                               methods=['GET'],
                               view_func=self.device.report_encoders_handler)
 
         # add endpoint for info about the driver
-        logging.info(f"adding endpoint {'/about'}")
+        logging.debug(f"Adding endpoint {'/about'}")
         self.app.add_url_rule('/about',
                               'ABOUT_DRIVER',
                               methods=['GET'],

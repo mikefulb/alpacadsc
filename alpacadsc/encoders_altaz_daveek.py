@@ -1,5 +1,5 @@
 #
-#  Encoder driver for simulated setting circles
+#  Encoder driver for Dave Ek's style setting circles
 #
 # Copyright 2020 Michael Fulbright
 #
@@ -16,12 +16,14 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+import logging
+import serial
+
 from .baseencoders import EncodersBase
 
-class EncodersAltAzSimulator(EncodersBase):
+class EncodersDaveEk(EncodersBase):
 
-    def __init__(self, res_alt=4000, res_az=4000, *,
+    def __init__(self, res_alt=4000, res_az=4000,
                  reverse_alt=False, reverse_az=False):
         """
         :param res_alt: Altitude encoder resolution, defaults to 4000
@@ -34,31 +36,38 @@ class EncodersAltAzSimulator(EncodersBase):
         :type reverse_az: bool, optional
 
         """
+
         self.res_az = res_az
         self.res_alt = res_alt
         self.reverse_az = reverse_az
         self.reverse_alt = reverse_alt
+        self.serial = None
 
     def name(self):
-        return "Simulator"
+        return "DaveEk"
 
     def connect(self, port, speed=9600):
         """
         The driver should connect to the digital setting circles hardware
         when this method is called.
 
-        Note: port and speed ignored in this simulator driver.
-
         :param port: Serial device to which digital setting circles is connected.
         :type action: str
         :param res_alt: Speed for serial connection.
         :type action: int
         :returns: (bool) True is successful.
+
         """
+        if self.serial is not None:
+            logging.warning('AltAzEncoders: self.serial is not None and connecting!')
+        self.port = port
+        self.serial = serial.Serial(port, speed, timeout=5)
         return True
 
     def disconnect(self):
-        return True
+        if self.serial is not None:
+            self.serial.close()
+        self.serial = None
 
     def get_encoder_resolution(self):
         """
@@ -68,9 +77,21 @@ class EncodersAltAzSimulator(EncodersBase):
             (ttuple)  The resolution of the altitude and azimuth encoders.
 
         """
-        logging.debug(f'get_encoder_resolution:  alt_steps={self.res_alt}, '
-                      f'az_steps={self.res_az}')
-        return self.res_alt, self.res_az
+        if self.serial is None:
+            logging.error('get_encoder_resolution: not connected!')
+            return None
+
+        self.serial.write(b'h')
+        resp = self.serial.read(4)
+        logging.debug(f'get_encoder_resolution resp = {resp}')
+
+        if len(resp) != 4:
+            logging.error(f'get_encoder_resolution: expected 4 bytes got {len(resp)}')
+        else:
+            alt_steps = int.from_bytes(resp[0:2], 'little')
+            az_steps = int.from_bytes(resp[2:4], 'little')
+            logging.debug(f'get_encoder_resolution:  alt_steps={alt_steps}, '
+                          f'az_steps={az_steps}')
 
     def get_encoder_position(self):
         """
@@ -80,9 +101,23 @@ class EncodersAltAzSimulator(EncodersBase):
             (ttuple)  The position of the altitude and azimuth encoders.
 
         """
-        alt_steps = 2000
-        az_steps = 2000
-        return alt_steps, az_steps
+        if self.serial is None:
+            logging.error('get_encoder_position: not connected!')
+            return None
+
+        self.serial.write(b'y')
+        resp = self.serial.read(4)
+        logging.debug(f'get_encoder_position resp = {resp}')
+
+        if len(resp) != 4:
+            logging.error(f'get_encoder_position: expected 4 bytes got {len(resp)}')
+            return None
+        else:
+            alt_steps = int.from_bytes(resp[0:2], 'little')
+            az_steps = int.from_bytes(resp[2:4], 'little')
+            #logging.debug(f'get_encoder_position:  alt_steps={alt_steps}, '
+            #               f'az_steps={az_steps}')
+            return alt_steps, az_steps
 
     def set_encoder_resolution(self, res_alt, res_az):
         """
@@ -94,5 +129,14 @@ class EncodersAltAzSimulator(EncodersBase):
         :type action: int
 
         """
+        enc_res_az = int.to_bytes(res_alt, 2, 'little')
+        enc_res_az = int.to_bytes(res_az, 2, 'little')
+
+        logging.debug(f'set_encoder_resolution:  enc_alt_steps={enc_res_az}, '
+                      f'enc_az_steps={enc_res_az}')
+        self.serial.write(b'z')
+        self.serial.write(enc_res_az)
+        self.serial.write(enc_res_az)
+
         self.res_alt = res_alt
         self.res_az = res_az
