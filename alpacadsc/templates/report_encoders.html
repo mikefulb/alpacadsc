@@ -21,7 +21,11 @@ Alt/Az Setting Circles Driver Encoders Monitor
             <td>Connected:</td>
             <td id="Connected">{{ driver.connected }}</td>
         </tr>
-        {% if driver.encoders is not none %}
+        {% if driver.connected %}
+            <tr>
+                <td>Encoder ALT/AZ Resolution: </td>
+                <td id="ALTAZ_Counts">{{ driver.encoders.get_encoder_resolution() }}</td>
+            </tr>
             <tr>
                 <td>Encoder ALT/AZ Counts: </td>
                 <td id="ALTAZ_Counts">{{ driver.encoders.get_encoder_position() }}</td>
@@ -40,8 +44,21 @@ Alt/Az Setting Circles Driver Encoders Monitor
                 {% endif %}
             </tr>
     </table>
+
+        <form action="/setup/v1/telescope/0/setup" method="POST">
+          <input type="hidden" name="form_id" value="disconnect_driver_form">
+          <input type="submit" value="Disconnect">
+        </form>
+
         {% else %}
             </table>
             <p>Encoders not available. Please configure and connect to encoders.
+
+            <form action="/setup/v1/telescope/0/setup" method="POST">
+              <input type="hidden" name="form_id" value="connect_driver_form">
+              <input type="submit" value="Connect">
+            </form>
+
+
         {% endif %}
 {% endblock %}

@@ -62,6 +62,13 @@ class EncodersDaveEk(EncodersBase):
             logging.warning('AltAzEncoders: self.serial is not None and connecting!')
         self.port = port
         self.serial = serial.Serial(port, speed, timeout=5)
+
+
+        # some arduino based dsc will need time as they reset when opened
+        time.sleep(1)
+
+        # set resolution
+        self.set_encoder_resolution(self.res_alt, self.res_az)
         return True
 
     def disconnect(self):

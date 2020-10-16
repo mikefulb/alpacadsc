@@ -261,14 +261,14 @@ class AltAzSettingCircles(AlpacaBaseDevice):
                                 res_az=encoders_profile.az_resolution,
                                 reverse_alt=encoders_profile.alt_reverse,
                                 reverse_az=encoders_profile.az_reverse)
-        if self.encoders.connect(encoders_profile.serial_port,
+        if not self.encoders.connect(encoders_profile.serial_port,
                                  speed=encoders_profile.serial_speed):
-            logging.info(f'Connected to encoders on port {encoders_profile.serial_port}')
-            return True
-        else:
             self.encoders = None
             logging.info(f'Failed to connect to encoders on port {encoders_profile.serial_port}')
             return False
+
+        logging.info(f'Connected to encoders on port {encoders_profile.serial_port}')
+        return True
 
     # handle device specific actions or pass to base
     def get_action_handler(self, action):
@@ -496,6 +496,32 @@ class AltAzSettingCircles(AlpacaBaseDevice):
     def post_device_setup_handler(self):
         logging.info(f'post_device_setup_handler request.form={request.form}')
 
+        # identify which form this is from
+        form_id = request.form.get('form_id')
+        logging.info(f'form_id = {form_id}')
+
+        # handle selection of new current profile
+        if form_id == 'connect_driver_form' or form_id == 'disconnect_driver_form':
+            if form_id == 'disconnect_driver_form':
+                action = 'Disconnect'
+                res = self.disconnect()
+            else:
+                action = 'Connect'
+                if self.connected:
+                    # if already connected just skip and succeed
+                    logging.debug('Already connected so skipping /setup '
+                                  'connection request.')
+                    res = True
+                else:
+                    res = self.connect()
+
+            res_str = 'succeeded' if res else 'failed'
+
+            logging.debug(f'{action} action via /setup request {res_str}')
+            body = f'{action} action {res_str}.'
+            return render_template('connect.html', body_html=body)
+
+
         # do not accept changes while connected
         if self.connected:
             logging.error('post_device_setup_handler: request while connected!')
@@ -507,11 +533,11 @@ class AltAzSettingCircles(AlpacaBaseDevice):
                             '<br><p><a href="setup">'
                             'Return to setup page</a>')
 
-        # identify which form this is from
-        form_id = request.form.get('form_id')
-        logging.info(f'form_id = {form_id}')
+            logging.debug(f'{action} action via /setup request {res_str}')
+            body = f'{action} action {res_str}.'
+            return render_template('connect.html', body_html=body)
 
-        # handle selection of new current profile
+
         if form_id == 'selected_profile_form':
             new_profile = request.form.get('profile_choice')
             set_current_profile(PROFILE_BASENAME, new_profile)
