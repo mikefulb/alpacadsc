@@ -1,3 +1,5 @@
+<!-- Template for presenting list of profiles to user to choose the new -->
+<!-- current profilfe.                                                  -->
 {% extends "layout.html" %}
 
 {% block title %}
@@ -18,7 +20,6 @@ Alt/Az Setting Circles Driver Setup
             <input type="hidden" name="form_id" value="selected_profile_form">
             <table>
             {% for p in profile_list %}
-              {{p}} {{current_profile}}<br>
               {% if p == current_profile %}
                 {% set checked='checked' %}
               {% else %}

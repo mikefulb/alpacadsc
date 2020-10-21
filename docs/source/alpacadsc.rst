@@ -4,26 +4,26 @@ alpaca package
 Submodules
 ----------
 
-alpacadsc.basedevice module
+alpacadsc.alpaca_controller module
 ---------------------------------------
 
-.. automodule:: alpacadsc.basedevice
+.. automodule:: alpacadsc.alpaca_controller
     :members:
     :undoc-members:
     :show-inheritance:
 
-alpacadsc.deviceserver module
+alpacadsc.alpaca_models module
 -----------------------------------------
 
-.. automodule:: alpacadsc.deviceserver
+.. automodule:: alpacadsc.alpaca_models
     :members:
     :undoc-members:
     :show-inheritance:
 
-alpacadsc.altaz_dsc module
+alpacadsc.alpaca_service module
 ------------------------------------------
 
-.. automodule:: alpacadsc.altaz_dsc
+.. automodule:: alpacadsc.alpaca_service
     :members:
     :undoc-members:
     :show-inheritance:
@@ -65,6 +65,14 @@ alpacadsc.profiles module
 -------------------------------
 
 .. automodule:: alpacadsc.profiles
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+alpacadsc.setup_controller module
+-----------------------------------
+
+.. automodule:: alpacadsc.setup_controller
     :members:
     :undoc-members:
     :show-inheritance:

@@ -1,4 +1,2 @@
-
-# stub __init__.py
-
-__version__ = '0.10.0'
+# driver version - used by setuptools and web pages
+__version__ = '0.20.0'

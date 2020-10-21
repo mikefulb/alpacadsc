@@ -16,11 +16,13 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import time
 import logging
 import serial
 
 from .baseencoders import EncodersBase
+
 
 class EncodersDaveEk(EncodersBase):
 
@@ -56,14 +58,16 @@ class EncodersDaveEk(EncodersBase):
         :type action: str
         :param res_alt: Speed for serial connection.
         :type action: int
-        :returns: (bool) True is successful.
+        :returns: True is successful.
+        :rtype: bool
 
         """
+
         if self.serial is not None:
             logging.warning('AltAzEncoders: self.serial is not None and connecting!')
+
         self.port = port
         self.serial = serial.Serial(port, speed, timeout=5)
-
 
         # some arduino based dsc will need time as they reset when opened
         time.sleep(1)
@@ -73,6 +77,14 @@ class EncodersDaveEk(EncodersBase):
         return True
 
     def disconnect(self):
+        """
+        Disconnect.
+
+        :returns: True is successful.
+        :rtype: bool
+
+        """
+
         if self.serial is not None:
             self.serial.close()
         self.serial = None
@@ -82,7 +94,7 @@ class EncodersDaveEk(EncodersBase):
         Read the encoders resolution from the digital setting circles hardware.
 
         :returns:
-            (ttuple)  The resolution of the altitude and azimuth encoders.
+            (tuple)  The resolution of the altitude and azimuth encoders.
 
         """
         if self.serial is None:

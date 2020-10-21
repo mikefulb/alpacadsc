@@ -19,25 +19,30 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import time
 import logging
 import argparse
-
 from datetime import datetime
 
+from flask import Flask
+from flask_restx import Api
+
 from . import __version__ as version
-from .deviceserver import AlpacaDeviceServer
-from .altaz_dsc import AltAzSettingCircles as TelescopeDevice
+from .alpaca_controller import AlpacaTelescope
+from .alpaca_models import AlpacaAltAzTelescopeModel as TelescopeModel
+from .setup_controller import About, MonitorEncoders, GlobalSetup, DeviceSetup
 
 
 def parse_command_line():
     parser = argparse.ArgumentParser()
     parser.add_argument('--profile', type=str, help='Name of astro profile')
-    parser.add_argument('--listprofiles', action='store_true', help='List known profiles')
+    parser.add_argument('--listprofiles', action='store_true',
+                        help='List known profiles')
     parser.add_argument('--port', type=int, default=8000,
                         help='TCP Port Alpaca server will listen on.')
-    parser.add_argument('--debug', action='store_true', help='Set log level DEBUG')
-    parser.add_argument('--simul', action='store_true', help='Run as simulation')
+    parser.add_argument('--debug', action='store_true',
+                        help='Set log level DEBUG')
+    parser.add_argument('--simul', action='store_true',
+                        help='Run as simulation')
 
     args = parser.parse_args()
     logging.debug(f'cmd args = {args}')
@@ -48,22 +53,37 @@ def runapp(args):
 
     logging.info(f'Alpaca DSC Driver version {version} starting...')
 
-    # create alpaca device object
-    device = TelescopeDevice(args.profile)
+    app = Flask(__name__)
+    api = Api(app)
+    driver = TelescopeModel()
 
-    # start api server
-    api_server = AlpacaDeviceServer(device, port=args.port)
-    api_server.start()
-    logging.info('Alpaca API server for encoders started')
+    api.add_resource(AlpacaTelescope, '/api/v1/telescope/0/<string:action>',
+                      endpoint='Alpaca',
+                      resource_class_kwargs={'driver': driver})
 
-    while True:
-        time.sleep(1)
+    api.add_resource(About, '/about', endpoint='About',
+                      resource_class_kwargs={'driver': driver})
+
+    api.add_resource(MonitorEncoders, '/encoders', endpoint='Encoders',
+                      resource_class_kwargs={'driver': driver})
+
+    api.add_resource(GlobalSetup, '/setup', endpoint='GlobalSetup',
+                      resource_class_kwargs={'driver': driver,
+                                            'server_ip': '127.0.0.1',
+                                            'server_port': args.port})
+
+    api.add_resource(DeviceSetup, '/setup/v1/telescope/0/setup',
+                      endpoint='DeviceSetup',
+                      resource_class_kwargs={'driver': driver})
+
+
+    app.run(host='127.0.0.1', port=args.port, debug=True)
 
 
 def main():
     # FIXME assumes tz is set properly in system?
     logfilename = 'alpacadsc'
-    logfilename += '-' + datetime.now().strftime('%Y%m%d%H%M%S')
+#    logfilename += '-' + datetime.now().strftime('%Y%m%d%H%M%S')
     logfilename += '.log'
 
     LONG_FORMAT = '%(asctime)s [%(filename)20s:%(lineno)3s - ' + \
@@ -82,7 +102,7 @@ def main():
     cmd_args = parse_command_line()
 
     if cmd_args.debug:
-        #formatter = logging.Formatter(LONG_FORMAT)
+        # formatter = logging.Formatter(LONG_FORMAT)
         formatter = logging.Formatter(SHORT_FORMAT)
         CH.setLevel(logging.DEBUG)
         CH.setFormatter(formatter)

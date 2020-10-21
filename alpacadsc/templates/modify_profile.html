@@ -1,3 +1,4 @@
+<!-- Template for showing result state for modifying a profile -->
 {% extends "layout.html" %}
 
 {% block title %}
@@ -10,4 +11,7 @@ Alt/Az Setting Circles Driver Setup
     <div>
     {{ body_html|safe }}
     </div>
+
+<br><p><a href="{{ url_for('DeviceSetup') }}">
+Return to setup page</a>
 {% endblock %}

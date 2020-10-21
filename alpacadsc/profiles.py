@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+
 import os
 import logging
 from dataclasses import dataclass
@@ -31,6 +32,7 @@ def get_base_config_dir():
         (Path) Root path of where config files are stored
     :raises FileNotFoundError: If base path cannot be determined.
     """
+
     if os.name == 'nt':
         basedir = Path(os.path.expandvars('%APPDATA%'))
     elif os.name == 'posix':
@@ -54,6 +56,7 @@ def find_profiles(loc):
     :returns:
         (List[str]) List of profiles found or [] if none available.
     """
+
     config_path = get_base_config_dir() / loc
     config_files = config_path.glob('*.yaml')
     return sorted(x.name for x in config_files if x.name != 'current_profile.yaml')
@@ -74,9 +77,10 @@ def set_current_profile(loc, current_profile_name):
         (bool) Whether operation was successful or not
 
     """
+
     basedir = get_base_config_dir() / loc
 
-    dataobj = {'current_profile' : current_profile_name}
+    dataobj = {'current_profile': current_profile_name}
     yaml_cur_file = basedir / 'current_profile.yaml'
     with yaml_cur_file.open('w') as yaml_f:
         yaml.dump(dataobj, stream=yaml_f, default_flow_style=False)
@@ -95,6 +99,7 @@ def get_current_profile(loc):
         (str) Name of currently active profile or None if none defined.
 
     """
+
     basedir = get_base_config_dir() / loc
 
     yaml_cur_file = basedir / 'current_profile.yaml'
@@ -136,12 +141,13 @@ class ProfileSection(object):
         :returns:
             (dict) Dictionary representation of ProfileSection
         """
-        #logging.info(f'class {self.__class__.__name__}.to_dict():')
+
+        # logging.info(f'class {self.__class__.__name__}.to_dict():')
         d = {}
-        #logging.info(f' property_keys = {self._property_keys()}')
-        #logging.info(f' dir(self) = {dir(self)}')
+        # logging.info(f' property_keys = {self._property_keys()}')
+        # logging.info(f' dir(self) = {dir(self)}')
         for k in self._property_keys():
-            #logging.info(f'   {k}  {self.__dict__[k]}')
+            # logging.info(f'   {k}  {self.__dict__[k]}')
             d[k] = self.__dict__[k]
         return d
 
@@ -152,11 +158,12 @@ class ProfileSection(object):
         :param d: Dictionary to use to initialize object.
         :type d: dict
         """
-        #logging.info(f'ProfileSection _from_dict {d}')
+
+        # logging.info(f'ProfileSection _from_dict {d}')
         for k, v in d.items():
-            #logging.info(f' copying key {k} value = {v}')
+            # logging.info(f' copying key {k} value = {v}')
             self.__dict__[k] = v
-        #logging.info(f' final __dict__ = {self.__dict__}')
+        # logging.info(f' final __dict__ = {self.__dict__}')
 
     def get(self, key, default=None):
         """
@@ -169,6 +176,7 @@ class ProfileSection(object):
         :returns:
             Parameter value or default value if not present.
         """
+
         try:
             val = self.__getattribute__(key)
         except AttributeError:
@@ -179,10 +187,11 @@ class ProfileSection(object):
         """
         Returns string representation of ProfileSection
         """
+
         s = f'{self.__class__.__name__}('
         ks = self.property_keys()
         i = 0
-        #print(f'\n{ks}\n')
+
         for k in ks:
             if k == '_sectionname':
                 continue
@@ -215,8 +224,8 @@ class Profile:
         Note: reldir = "hfdfocus/" and name = "C8F7.yaml" would create
         a file  <configbasedir>/hfdfocus/C8F7.yaml
 
-
         """
+
         self._config_reldir = reldir
 
         self._config_filename = name
@@ -233,6 +242,7 @@ class Profile:
         :param sectionclass: Section to be added.
         :type sectionclass: ProfileSection
         """
+
         self.sections[sectionclass._sectionname] = sectionclass
         self.__dict__[sectionclass._sectionname] = sectionclass()
 
@@ -257,6 +267,7 @@ class Profile:
         :returns:
             (Path) Full path to profile config file.
         """
+
         return Path(self._get_config_dir()) / self._config_filename
 
     def filename(self):
@@ -266,6 +277,7 @@ class Profile:
         :returns:
             (Path) Profile filename
         """
+
         return self._get_config_filename()
 
     def write(self):
@@ -275,6 +287,7 @@ class Profile:
         :returns:
             (bool) Whether or not write succeeded.
         """
+
         # NOTE will overwrite existing without warning!
         logging.debug(f'Configuration files stored in {self._get_config_dir()}')
 
@@ -308,6 +321,7 @@ class Profile:
         :returns:
             (bool) Whether or not read succeeded.
         """
+
         with self._get_config_filename().open('r') as yaml_f:
             d = yaml.safe_load(stream=yaml_f)
 
@@ -330,6 +344,7 @@ class Profile:
         :returns:
             (str) String representation of Profile
         """
+
         s = f'{self.__class__.__name__}('
         ks = self.sections.keys()
 

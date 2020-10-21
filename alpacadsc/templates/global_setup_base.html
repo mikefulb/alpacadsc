@@ -1,3 +1,4 @@
+<!-- Template for global setup page -->
 {% extends "layout.html" %}
 
 {% block title %}
@@ -8,15 +9,15 @@ Alt/Az Setting Circles Alpaca Server Information
     <h1>Alt/Az Setting Circles Alpaca Server Information</h1>
         <h2>Server Info</h2>
         <table>
-          <tr><td>Alpaca Server Address</td><td>{{server.host}}</td></tr>
-          <tr><td>Alpaca Server Port</td><td>{{server.port}}</td></tr>
+          <tr><td>Alpaca Server Address</td><td>{{server_ip}}</td></tr>
+          <tr><td>Alpaca Server Port</td><td>{{server_port}}</td></tr>
         </table>
         <h2>Driver Info</h2>
         <table>
-          <tr><td>Driver Name</td><td>{{device.name}}</td></tr>
-          <tr><td>Driver Info</td><td>{{device.driverinfo}}</td></tr>
-          <tr><td>Driver Description</td><td>{{device.description}}</td></tr>
-          <tr><td>Driver Version</td><td>{{device.driver_version}}</td></tr>
+          <tr><td>Driver Name</td><td>{{driver.name}}</td></tr>
+          <tr><td>Driver Info</td><td>{{driver.driverinfo}}</td></tr>
+          <tr><td>Driver Description</td><td>{{driver.description}}</td></tr>
+          <tr><td>Driver Version</td><td>{{driver.driver_version}}</td></tr>
         </table>
         <br>
         Device specific setup is available under "Driver Setup" in the
