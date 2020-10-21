@@ -19,65 +19,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import time
-import serial
 
-from .baseencoders import EncodersBase
+from .baseencoders_serial import EncodersSerial
 
 
-class EncodersGeneric(EncodersBase):
+class EncodersGeneric(EncodersSerial):
 
-    def __init__(self, res_alt=4000, res_az=4000,
-                 reverse_alt=False, reverse_az=False):
-        """
-        :param res_alt: Altitude encoder resolution, defaults to 4000
-        :type res_alt: int, optional
-        :param res_az: Azimuth encoder resolution, defaults to 4000
-        :type res_az: int, optional
-        :param reverse_alt: Reverse altitude axis, defaults to False
-        :type reverse_alt: bool, optional
-        :param reverse_az: Reverse azimuth axis, defaults to False
-        :type reverse_az: bool, optional
-
-        """
-
-        self.res_az = res_az
-        self.res_alt = res_alt
-        self.reverse_az = reverse_az
-        self.reverse_alt = reverse_alt
-        self.serial = None
+    _is_plugin = True
 
     def name(self):
         return "Generic"
-
-    def connect(self, port, speed=9600):
-        """
-        The driver should connect to the digital setting circles hardware
-        when this method is called.
-
-        :param port: Serial device to which digital setting circles is connected.
-        :type action: str
-        :param res_alt: Speed for serial connection.
-        :type action: int
-        :returns: (bool) True is successful.
-
-        """
-        if self.serial is not None:
-            logging.warning('EncodersGeneric: self.serial is not None and connecting!')
-        self.port = port
-        self.serial = serial.Serial(port, speed, timeout=5)
-
-        # some arduino based dsc will need time as they reset when opened
-        time.sleep(1)
-
-        # set resolution
-        self.set_encoder_resolution(self.res_alt, self.res_az)
-        return True
-
-    def disconnect(self):
-        if self.serial is not None:
-            self.serial.close()
-        self.serial = None
 
     def get_encoder_resolution(self):
         """
@@ -151,6 +102,7 @@ class EncodersGeneric(EncodersBase):
                       f'res_alt={res_alt}, '
                       f'res_az={res_az}')
         cmd = f'Z{res_alt:+d} {res_az:+d}\r\n'.encode('utf-8')
+        logging.debug(f'set encoder resolution cmd is "{cmd}"')
         self.serial.write(cmd)
         resp = self.serial.read(1)
         logging.debug(f'set_encoder_position resp = {resp}')

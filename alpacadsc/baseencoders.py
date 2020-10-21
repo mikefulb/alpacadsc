@@ -86,8 +86,3 @@ class EncodersBase(metaclass=ABCMeta):
 
         """
         pass
-
-
-class A(EncodersBase):
-    def __init__(self):
-        pass

@@ -1,5 +1,5 @@
 #
-#  Encoder driver for simulated setting circles
+#  Base encoder driver for digital setting circles using a serial connection
 #
 # Copyright 2020 Michael Fulbright
 #
@@ -16,18 +16,23 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
 
+import time
 import logging
+import serial
 
 from .baseencoders import EncodersBase
 
 
-class EncodersAltAzSimulator(EncodersBase):
+class EncodersSerial(EncodersBase):
+    """ Base class for all DSC drivers using a serial port. """
 
-    _is_plugin = True
+    # set to false so scan for drivers will skip over this one
+    # as it is also a subclass for EncodersBase but is not
+    # a fully implemented driver
+    _is_plugin = False
 
-    def __init__(self, res_alt=4000, res_az=4000, *,
+    def __init__(self, res_alt=4000, res_az=4000,
                  reverse_alt=False, reverse_az=False):
         """
         :param res_alt: Altitude encoder resolution, defaults to 4000
@@ -40,43 +45,68 @@ class EncodersAltAzSimulator(EncodersBase):
         :type reverse_az: bool, optional
 
         """
+
         self.res_az = res_az
         self.res_alt = res_alt
         self.reverse_az = reverse_az
         self.reverse_alt = reverse_alt
+        self.serial = None
 
     def name(self):
-        return "Simulator"
+        raise NotImplementedError
 
     def connect(self, port, speed=9600):
         """
         The driver should connect to the digital setting circles hardware
         when this method is called.
 
-        Note: port and speed ignored in this simulator driver.
-
         :param port: Serial device to which digital setting circles is connected.
         :type action: str
         :param res_alt: Speed for serial connection.
         :type action: int
-        :returns: (bool) True is successful.
+        :returns: True is successful.
+        :rtype: bool
+
         """
+
+        if self.serial is not None:
+            logging.warning('AltAzEncoders: self.serial is not None and connecting!')
+
+        logging.info(f'Connecting to f{self.name} style DSC '
+                     f' on port {port} at speed {speed}.')
+
+        self.port = port
+        self.serial = serial.Serial(port, speed, timeout=5)
+
+        # some arduino based dsc will need time as they reset when opened
+        time.sleep(5)
+
+        # set resolution
+        self.set_encoder_resolution(self.res_alt, self.res_az)
         return True
 
     def disconnect(self):
-        return True
+        """
+        Disconnect.
+
+        :returns: True is successful.
+        :rtype: bool
+
+        """
+
+        if self.serial is not None:
+            self.serial.close()
+        self.serial = None
 
     def get_encoder_resolution(self):
         """
         Read the encoders resolution from the digital setting circles hardware.
 
         :returns:
-            (ttuple)  The resolution of the altitude and azimuth encoders.
+            (tuple)  The resolution of the altitude and azimuth encoders.
 
         """
-        logging.debug(f'get_encoder_resolution:  alt_steps={self.res_alt}, '
-                      f'az_steps={self.res_az}')
-        return self.res_alt, self.res_az
+        raise NotImplementedError
 
     def get_encoder_position(self):
         """
@@ -86,9 +116,7 @@ class EncodersAltAzSimulator(EncodersBase):
             (ttuple)  The position of the altitude and azimuth encoders.
 
         """
-        alt_steps = 2000
-        az_steps = 2000
-        return alt_steps, az_steps
+        raise NotImplementedError
 
     def set_encoder_resolution(self, res_alt, res_az):
         """
@@ -100,5 +128,4 @@ class EncodersAltAzSimulator(EncodersBase):
         :type action: int
 
         """
-        self.res_alt = res_alt
-        self.res_az = res_az
+        raise NotImplementedError

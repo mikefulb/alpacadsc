@@ -137,23 +137,29 @@ class AlpacaAltAzTelescopeModel(AlpacaBaseModel):
 
         if attr in ['altitude', 'azimuth']:
             altaz = self.get_current_altaz()
-            if altaz is not None:
-                cur_alt, cur_az = altaz
-                if attr == 'altitude':
-                    return cur_alt
-                elif attr == 'azimuth':
-                    return cur_az
-            else:
-                raise ValueError
+
+            # FIXME For now if not synchronized just return 0, 0 for alt/az
+            if altaz is None:
+                altaz = (0, 0)
+
+            cur_alt, cur_az = altaz
+            if attr == 'altitude':
+                return cur_alt
+            elif attr == 'azimuth':
+                return cur_az
+
         elif attr in ['rightascension', 'declination']:
             radec = self.get_current_radec()
-            if radec is not None:
-                if attr == 'rightascension':
-                    return radec.ra.hour
-                elif attr == 'declination':
-                    return radec.dec.degree
-            else:
-                raise ValueError
+
+            # FIXME For now if not synchronized just return 0, 0 for ra/dec
+            if radec is None:
+                radec = SkyCoord(ra=0*u.hour, dec=0*u.deg)
+
+            if attr == 'rightascension':
+                return radec.ra.hour
+            elif attr == 'declination':
+                return radec.dec.degree
+
         else:
             return super().__getattribute__(attr)
 
@@ -189,7 +195,11 @@ class AlpacaAltAzTelescopeModel(AlpacaBaseModel):
         for k, v in plugins.items():
             for _, c in inspect.getmembers(v, inspect.isclass):
                 if issubclass(c, EncodersBase) and c is not EncodersBase:
-                    self.encoders_plugins.append(Plugin(c().name(), v, c))
+                    # see if this is a template class like EncodersSerial
+                    # or a fully implemented driver
+                    is_plugin = getattr(c(), '_is_plugin', True)
+                    if is_plugin:
+                        self.encoders_plugins.append(Plugin(c().name(), v, c))
 
     def load_profile(self, try_profile=None):
         """
@@ -449,7 +459,7 @@ class AlpacaAltAzTelescopeModel(AlpacaBaseModel):
             logging.error('get_current_altaz: Unable to convert encoder position!')
             return None
 
-        logging.debug('current alt/az = {skyaltaz}')
+        logging.debug(f'current alt/az = {skyaltaz}')
         return skyaltaz
 
     def get_current_radec(self):
@@ -477,7 +487,7 @@ class AlpacaAltAzTelescopeModel(AlpacaBaseModel):
                             frame='altaz', location=self.earth_location)
 
         cur_radec = newaltaz.transform_to('icrs')
-        logging.debug('current ra/dec = {cur_radec}')
+        logging.debug(f'current ra/dec = {cur_radec.to_string("hmsdms", sep=":")}')
 
         return cur_radec
 
