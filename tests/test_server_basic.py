@@ -5,6 +5,9 @@
 # Invocation:  Run from the root directory of alpacadsc git checkout:
 #              python -m pytest -v tests/
 #
+# To see logging output up to a certain log level add the options:
+#              "-v -o log_cli=true --log-cli-level=DEBUG"
+#
 # Copyright 2020 Michael Fulbright
 #
 #
@@ -21,56 +24,20 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-
-import pytest
 from pathlib import Path
 
-from alpacadsc.deviceserver import AlpacaDeviceServer
-from alpacadsc.altaz_dsc import AltAzSettingCircles, PROFILE_BASENAME
+from alpacadsc.alpaca_models import PROFILE_BASENAME
 from alpacadsc.profiles import find_profiles, get_current_profile
 from alpacadsc.altaz_dsc_profile import AltAzSettingCirclesProfile as Profile
 
 from consts import ROOT_URI, GLOBAL_SETUP_URI, MONITOR_ENCODER_URL
 from consts import DRIVER_SETUP_URI, ABOUT_URI
 
-# assume templates are in alpacadsc module
-# import a module and find __file__
-import alpacadsc.startservice
-templates_path = Path(alpacadsc.startservice.__file__).resolve().parent
-
-
-@pytest.fixture
-def client():
-    """ Create test client for testing Flask app """
-    api_server = AlpacaDeviceServer(AltAzSettingCircles())
-
-    # push context so GET/POST will work
-    api_server.app.app_context().push()
-
-    with api_server.app.test_client() as client:
-        yield client
-
-    # do cleanup here
-    pass
-
-
-@pytest.fixture
-def my_fs(fs):
-    """ Add Flask temlates path as exception to fake fs """
-    fs.add_real_directory(templates_path)
-    yield fs
-
-#
-# Test Endpoints
-#
-# This section will go through and exercise the main endpoints of the
-# Alpaca driver web page.  These tests verify the pages load and contain
-# a string which is expected but do not test the functionality or
-# integrity of the entire page that loads.
-#
-# These tests will verify the URL rules were setup properly for the
-# Flask app and that the templates were located and rendered.
-#
+# we must import pytest fixtures client and my_fs for the test cases
+# below to run properly.  Pytest will inject them into the argument
+# list for the test cases.  It is normal for a python linter to
+# report they are unused.
+from utils import client, my_fs
 
 
 def test_root(client):

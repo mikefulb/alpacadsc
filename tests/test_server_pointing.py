@@ -5,6 +5,9 @@
 # Invocation:  Run from the root directory of alpacadsc git checkout:
 #              python -m pytest -v tests/
 #
+# To see logging output up to a certain log level add the options:
+#              "-v -o log_cli=true --log-cli-level=DEBUG"
+#
 # Copyright 2020 Michael Fulbright
 #
 #
@@ -21,37 +24,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-
-import pytest
 from astropy.time import Time
 from astropy import units as u
 from astropy.coordinates import EarthLocation, SkyCoord
 
-from alpacadsc.deviceserver import AlpacaDeviceServer
-from alpacadsc.altaz_dsc import AltAzSettingCircles
-
 from consts import REST_API_URI
-from utils import create_test_profile, REST_Handler
+
+# we must import pytest fixtures client and my_fs for the test cases
+# below to run properly.  Pytest will inject them into the argument
+# list for the test cases.  It is normal for a python linter to
+# report they are unused.
+from utils import create_test_profile, REST_Handler, client, my_fs
 from utils import mock_encoder_and_read_values
-
-
-@pytest.fixture
-def client():
-    api_server = AlpacaDeviceServer(AltAzSettingCircles())
-
-    # push context so GET/POST will work
-    api_server.app.app_context().push()
-
-    with api_server.app.test_client() as client:
-        yield client
-
-    # do cleanup here
-    pass
-
-
-@pytest.fixture
-def my_fs(fs):
-    yield fs
 
 
 def test_encoders_endpoint(client, mocker):

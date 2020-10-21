@@ -5,6 +5,9 @@
 # Invocation:  Run from the root directory of alpacadsc git checkout:
 #              python -m pytest -v tests/
 #
+# To see logging output up to a certain log level add the options:
+#              "-v -o log_cli=true --log-cli-level=DEBUG"
+#
 # Copyright 2020 Michael Fulbright
 #
 #
@@ -21,33 +24,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-
-import pytest
 from alpacadsc import __version__ as AlpacaDSCDriver_Version
-from alpacadsc.deviceserver import AlpacaDeviceServer
-from alpacadsc.altaz_dsc import AltAzSettingCircles
+from alpacadsc.alpaca_models import AlpacaAltAzTelescopeModel
 
 from consts import REST_API_URI
-from utils import create_test_profile, REST_Handler
 
-
-@pytest.fixture
-def client():
-    api_server = AlpacaDeviceServer(AltAzSettingCircles())
-
-    # push context so GET/POST will work
-    api_server.app.app_context().push()
-
-    with api_server.app.test_client() as client:
-        yield client
-
-    # do cleanup here
-    pass
-
-
-@pytest.fixture
-def my_fs(fs):
-    yield fs
+# we must import pytest fixtures client and my_fs for the test cases
+# below to run properly.  Pytest will inject them into the argument
+# list for the test cases.  It is normal for a python linter to
+# report they are unused.
+from utils import create_test_profile, REST_Handler, client, my_fs
 
 
 def test_rest_get_basic(client):
@@ -57,7 +43,7 @@ def test_rest_get_basic(client):
 
     # get a driver object and compare attributes to those
     # returned by a REST API call
-    altaz_driver = AltAzSettingCircles()
+    altaz_driver = AlpacaAltAzTelescopeModel()
 
     # create handler for sending REST requests
     rest = REST_Handler(client, REST_API_URI)
@@ -77,10 +63,11 @@ def test_rest_get_basic(client):
     # driver version
     rv = rest.get('driverversion')
     assert f'{AlpacaDSCDriver_Version}' == rv.json['Value']
+    assert f'{altaz_driver.driverversion}' == rv.json['Value']
 
     # interface version
     rv = rest.get('interfaceversion')
-    assert altaz_driver.interface_version == rv.json['Value']
+    assert altaz_driver.interfaceversion == rv.json['Value']
 
     # connected
     rv = rest.get('connected')

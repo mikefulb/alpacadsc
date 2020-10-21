@@ -23,7 +23,7 @@ import logging
 import argparse
 from datetime import datetime
 
-from flask import Flask
+from flask import Flask, redirect
 from flask_restx import Api
 
 from . import __version__ as version
@@ -48,13 +48,32 @@ def parse_command_line():
     logging.debug(f'cmd args = {args}')
     return args
 
+def redirect_root():
+    """Redirect root to setup page for convenience to user"""
+    print("HERE")
+    return redirect('/setup')
 
-def runapp(args):
+def create_app(port=8000):
+    """
+    Create Flask app object.
 
-    logging.info(f'Alpaca DSC Driver version {version} starting...')
+    :param port: TCP port for service to use.
+    :type port: int
+    :return: Flask app object
+    :rtype: Flask()
+
+    """
 
     app = Flask(__name__)
-    api = Api(app)
+
+    # we need to add redirect for '/' to '/setup' before
+    # connecting api to app or else the rule for '/' inserted
+    # by the api creation will override.
+    app.add_url_rule('/', 'ROOT_REDIRECT', methods=['GET'],
+                    view_func=redirect_root)
+
+    api = Api(app, doc='/apidoc/')
+
     driver = TelescopeModel()
 
     api.add_resource(AlpacaTelescope, '/api/v1/telescope/0/<string:action>',
@@ -70,12 +89,20 @@ def runapp(args):
     api.add_resource(GlobalSetup, '/setup', endpoint='GlobalSetup',
                       resource_class_kwargs={'driver': driver,
                                             'server_ip': '127.0.0.1',
-                                            'server_port': args.port})
+                                            'server_port': port})
 
     api.add_resource(DeviceSetup, '/setup/v1/telescope/0/setup',
                       endpoint='DeviceSetup',
                       resource_class_kwargs={'driver': driver})
 
+    return app
+
+
+def run_app(args):
+
+    logging.info(f'Alpaca DSC Driver version {version} starting...')
+
+    app = create_app(args.port)
 
     app.run(host='127.0.0.1', port=args.port, debug=True)
 
@@ -113,7 +140,7 @@ def main():
 
     LOG.addHandler(CH)
 
-    runapp(cmd_args)
+    run_app(cmd_args)
 
 
 if __name__ == '__main__':

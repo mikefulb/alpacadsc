@@ -87,13 +87,14 @@ def _put_handler(arglist, form):
     d['ClientTransactionID'] = fields.Integer(required=True)
 
     schema = Schema.from_dict(d)
+
     result = None
     try:
         try_result = schema().load(form)
     except ValidationError:
-        logging.error('_put_handler: failed to validate')
+        logging.error('_put_handler: failed to validate', exc_info=True)
     except ValueError:
-        logging.error('_put_handler: invalid values')
+        logging.error('_put_handler: invalid values', exc_info=True)
     else:
         result = {}
         for key in arglist:

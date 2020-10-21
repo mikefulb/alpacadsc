@@ -17,7 +17,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-from flask import request
+import logging
+from flask import request, redirect
 from flask_restx import Resource
 
 from .alpaca_service import AlpacaBaseService, AlpacaTelescopeService
@@ -66,6 +67,8 @@ class AlpacaBase(Resource):
     def put(self, action):
         resp = {'ErrorNumber': 0, 'ErrorString': ''}
 
+        logging.debug(f'AlpacaBase:put() {action} {request.form}')
+
         try:
             method = getattr(self.base_service, action)
         except AttributeError:
@@ -95,6 +98,8 @@ class AlpacaTelescope(AlpacaBase):
     def get(self, action):
         resp = {'ErrorNumber': 0, 'ErrorString': '', 'Value': ''}
 
+        # FIXME Should we add check for a ClientID and ClientTransactionID?
+
         try:
             resp['Value'] = getattr(self.driver, action)
         except AttributeError:
@@ -104,6 +109,8 @@ class AlpacaTelescope(AlpacaBase):
 
     def put(self, action):
         resp = {'ErrorNumber': 0, 'ErrorString': ''}
+
+        logging.debug(f'AlpacaTelescope:put() {action} {request.form}')
 
         try:
             method = getattr(self.service, action)

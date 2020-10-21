@@ -50,9 +50,7 @@ PROFILE_BASENAME = "alpacadsc"
 class AlpacaBaseModel:
     def __init__(self):
         self.connected = False
-        self.sitelatitude = 0.0
-        self.sitelongitude = 0.0
-        self.siteelevation = 0.0
+        self.interfaceversion = 0
 
 
 class AlpacaAltAzTelescopeModel(AlpacaBaseModel):
@@ -65,9 +63,9 @@ class AlpacaAltAzTelescopeModel(AlpacaBaseModel):
         super().__init__()
 
         # driver info
-        self.driver_version = ALPACADSC_VERSION
+        self.driverversion = ALPACADSC_VERSION
         self.description = 'Alt/Az Setting Circles'
-        self.driverinfo = self.description + f' V. {self.driver_version}'
+        self.driverinfo = self.description + f' V. {self.driverversion}'
         self.name = 'AltAzSettingCircles'
         # self.supported_actions = [] # FIXME NOT NEEDED?
 
@@ -319,7 +317,7 @@ class AlpacaAltAzTelescopeModel(AlpacaBaseModel):
                          f'{encoders_profile.serial_port}')
             return False
 
-        logging.info(f'Connected to encoders on port {encoders_profile.serial_port}')
+        logging.info(f'Connected to encoders.')
         return True
 
     # FIXME connect/disconnect does not distiguish between clients - is this
