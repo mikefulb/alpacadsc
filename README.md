@@ -11,10 +11,12 @@ software that expects a traditional ASCOM driver.
 Features
 ---------
 
- - Support for DSC using the "Dave Ek" serial protocol
  - 1 star alignment/synchronization
  - Web based configuration of driver parameters
  - Supports multiple telescope configurations
+ - Support for follwowing DSCs:
+    * "Dave Ek" serial protocol
+    * Generic protocol (common to Bbox, Astrdevices Nexus, Intelliscope/NGCMax)
 
 Supported Platforms
 -------------------
