@@ -1,5 +1,6 @@
 #
-#  Encoder driver for Dave Ek's style setting circles
+#  Encoder driver using generic setting circles commands for devices
+#  like BBox, Intelliscope, NGCMax
 #
 # Copyright 2020 Michael Fulbright
 #
@@ -16,13 +17,13 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import time
 import logging
+import time
 import serial
 
 from .baseencoders import EncodersBase
 
-class EncodersDaveEk(EncodersBase):
+class EncodersGeneric(EncodersBase):
 
     def __init__(self, res_alt=4000, res_az=4000,
                  reverse_alt=False, reverse_az=False):
@@ -45,7 +46,7 @@ class EncodersDaveEk(EncodersBase):
         self.serial = None
 
     def name(self):
-        return "DaveEk"
+        return "Generic"
 
     def connect(self, port, speed=9600):
         """
@@ -60,10 +61,9 @@ class EncodersDaveEk(EncodersBase):
 
         """
         if self.serial is not None:
-            logging.warning('AltAzEncoders: self.serial is not None and connecting!')
+            logging.warning('EncodersGeneric: self.serial is not None and connecting!')
         self.port = port
         self.serial = serial.Serial(port, speed, timeout=5)
-
 
         # some arduino based dsc will need time as they reset when opened
         time.sleep(1)
@@ -89,15 +89,18 @@ class EncodersDaveEk(EncodersBase):
             logging.error('get_encoder_resolution: not connected!')
             return None
 
-        self.serial.write(b'h')
-        resp = self.serial.read(4)
+        self.serial.write(b'H\r\n')
+        resp = self.serial.read_until(b'\r')
         logging.debug(f'get_encoder_resolution resp = {resp}')
+        resp = resp.decode('utf-8').strip()
 
-        if len(resp) != 4:
-            logging.error(f'get_encoder_resolution: expected 4 bytes got {len(resp)}')
+        fields = resp.split('\t')
+        if len(fields) != 2:
+            logging.error('get_encoder_resolution: unexpected response!')
+            return None
         else:
-            alt_steps = int.from_bytes(resp[0:2], 'little')
-            az_steps = int.from_bytes(resp[2:4], 'little')
+            alt_steps = int(fields[0])
+            az_steps = int(fields[1])
             logging.debug(f'get_encoder_resolution:  alt_res={alt_steps}, '
                           f'az_res={az_steps}')
             return alt_steps, az_steps
@@ -114,16 +117,20 @@ class EncodersDaveEk(EncodersBase):
             logging.error('get_encoder_position: not connected!')
             return None
 
-        self.serial.write(b'y')
-        resp = self.serial.read(4)
+        logging.info('sending request')
+        self.serial.write(b'Q\r\n')
+        logging.info('request sent')
+        resp = self.serial.read_until(b'\r')
         logging.debug(f'get_encoder_position resp = {resp}')
+        resp = resp.decode('utf-8').strip()
 
-        if len(resp) != 4:
-            logging.error(f'get_encoder_position: expected 4 bytes got {len(resp)}')
+        fields = resp.split('\t')
+        if len(fields) != 2:
+            logging.error('get_encoder_position: unexpected response!')
             return None
         else:
-            alt_steps = int.from_bytes(resp[0:2], 'little')
-            az_steps = int.from_bytes(resp[2:4], 'little')
+            alt_steps = int(fields[0])
+            az_steps = int(fields[1])
             logging.debug(f'get_encoder_position:  alt_steps={alt_steps}, '
                           f'az_steps={az_steps}')
             return alt_steps, az_steps
@@ -141,14 +148,15 @@ class EncodersDaveEk(EncodersBase):
         logging.debug('set_encoder_resolution:  setting resolution to '
                       f'res_alt={res_alt}, '
                       f'res_az={res_az}')
-        enc_res_alt = int.to_bytes(res_alt, 2, 'little')
-        enc_res_az = int.to_bytes(res_az, 2, 'little')
-
-        logging.debug(f'set_encoder_resolution:  enc_res_alt={enc_res_alt}, '
-                      f'enc_res_az={enc_res_az}')
-        self.serial.write(b'z')
-        self.serial.write(enc_res_alt)
-        self.serial.write(enc_res_az)
-
-        self.res_alt = res_alt
-        self.res_az = res_az
+        cmd = f'Z{res_alt:+d} {res_az:+d}\r\n'.encode('utf-8')
+        self.serial.write(cmd)
+        resp = self.serial.read(1)
+        logging.debug(f'set_encoder_position resp = {resp}')
+        if resp == b'*':
+            logging.debug('Set resolution succeeded')
+            self.res_alt = res_alt
+            self.res_az = res_az
+            return True
+        else:
+            logging.error('Set resolution failed!')
+            return False
