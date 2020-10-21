@@ -56,6 +56,7 @@ setup(
     python_requires='>=3.7, <4',
 
     install_requires=['Flask>=1.1',
+                      'flask-restx>=0.2.0',
                       'astropy>=1.10',
                       'pyserial>=3',
                       'pyyaml>=5.3'],  # Optional
