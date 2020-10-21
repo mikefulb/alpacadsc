@@ -41,6 +41,8 @@ def parse_command_line():
                         help='TCP Port Alpaca server will listen on.')
     parser.add_argument('--debug', action='store_true',
                         help='Set log level DEBUG')
+    parser.add_argument('--quiet', action='store_true',
+                        help='Hide most output except warnings and error messages.')
     parser.add_argument('--simul', action='store_true',
                         help='Run as simulation')
 
@@ -104,7 +106,7 @@ def run_app(args):
 
     app = create_app(args.port)
 
-    app.run(host='127.0.0.1', port=args.port, debug=True)
+    app.run(host='127.0.0.1', port=args.port, debug=args.debug)
 
 
 def main():
@@ -135,7 +137,10 @@ def main():
         CH.setFormatter(formatter)
     else:
         formatter = logging.Formatter(SHORT_FORMAT)
-        CH.setLevel(logging.INFO)
+        if cmd_args.quiet:
+            CH.setLevel(logging.WARNING)
+        else:
+            CH.setLevel(logging.INFO)
         CH.setFormatter(formatter)
 
     LOG.addHandler(CH)
