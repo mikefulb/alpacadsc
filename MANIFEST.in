@@ -1,5 +1,5 @@
 include *.md
 include LICENSE.txt
 recursive-include docs/build/html *
-recursive-include AlpacaDSCDriver/templates *
-recursive-include AlpacaDSCDriver/static *
+recursive-include alpacadsc/templates *
+recursive-include alpacadsc/static *
