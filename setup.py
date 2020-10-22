@@ -66,9 +66,18 @@ setup(
 
     extras_require={}, # Optional
 
-    setup_requires=['flake8', 'pytest-runner', 'astropy'],
+    setup_requires=[
+                    'flake8',
+                    'pytest-runner',
+                    'astropy'],
 
-    tests_require=['pytest', 'pytest-flask', 'pyfakefs', 'astropy'],
+    tests_require=[
+                   'pytest',
+                   'pytest-flask',
+                   'pytest-mock',
+                   'pyfakefs',
+                   'lxml',
+                   'astropy'],
 
     package_data={}, #{'': 'docs/build/html/*'},# Optional
 
