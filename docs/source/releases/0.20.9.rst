@@ -1,0 +1,12 @@
+==============================
+Alpacadsc 0.20.9 release notes
+==============================
+
+*October 23, 2020*
+
+Bugfixes
+========
+
+* Fixes to package creation/testing.
+
+
