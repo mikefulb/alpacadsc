@@ -322,6 +322,11 @@ class DeviceSetup(Resource):
         alt_reverse = request.form.get('alt_reverse', 'false').lower() != 'false'
         az_reverse = request.form.get('az_reverse', 'false').lower() != 'false'
 
+        # FIXME Better way than special casing the Simulator driver?
+        if encoder_driver == 'Simulator':
+            serial_port = 'Simulator'
+            serial_speed = 9600
+
         logging.debug(f'{encoder_driver} {serial_port} {serial_speed} '
                       f'{alt_resolution} {az_resolution} '
                       f'{alt_reverse} {az_reverse}')

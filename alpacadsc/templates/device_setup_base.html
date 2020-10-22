@@ -60,6 +60,8 @@ Alt/Az Setting Circles Driver Setup
           <input type="submit" value="Change Profile">
         </form>
 
+        <p>
+
         <form action="setup" method="POST">
           <input type="hidden" name="form_id" value="new_profile_form">
           <table>
@@ -134,7 +136,7 @@ Alt/Az Setting Circles Driver Setup
             </form>
 
             <h3>Encoders</h3>
-            <form action="setup" method="POST">
+            <form action="setup" id="EncoderForm" method="POST">
             <input type="hidden" name="form_id" value="encoder_modify_form">
             <input type="hidden" name="profile_id" value="{{profile_name}}">
             <table>
@@ -159,13 +161,17 @@ Alt/Az Setting Circles Driver Setup
                 </td>
               </tr>
               <tr>
+                {% if profile.encoders.driver == 'Simulator' %}
+                {% set serial_disabled = "disabled" %}
+                {% else %}
+                {% set serial_disabled = "" %}
+                {% endif %}
                 <td>
                   <label for="serial_port">Serial Port</label>
                 </td>
                 <td>
-                  <select name="serial_port">
+                  <select name="serial_port" {{ serial_disabled }}>
                     {% for n in available_ports %}
-                    {{n}}<br>{{profile.encoders.serial_port}}<br>
                     {% if n == profile.encoders.serial_port %}
                     {% set selected = "selected" %}
                     {% else %}
@@ -185,7 +191,7 @@ Alt/Az Setting Circles Driver Setup
                   <label for="serial_speed">Serial Speed</label>
                 </td>
                 <td>
-                  <input type="text" name="serial_speed" value ="{{profile.encoders.serial_speed}}">
+                  <input type="text" name="serial_speed" {{ serial_disabled }} value ="{{profile.encoders.serial_speed}}">
                 </td>
                 <td>
                   Typically 9600
@@ -248,6 +254,24 @@ Alt/Az Setting Circles Driver Setup
             <br>
             <input type="submit" value="Save Changes">
             </form>
+
+            <!-- disable serial port if Simulator selected -->
+            <script>
+                console.log("HI!");
+                var form = document.getElementById("EncoderForm"),
+                    driver = form.elements.encoder_driver;
+
+                driver.onchange = function() {
+                    var form = this.form;
+                    if (this.value === "Simulator") {
+                        form.elements.serial_port.disabled = true;
+                        form.elements.serial_speed.disabled = true;
+                    } else {
+                        form.elements.serial_port.disabled = false;
+                        form.elements.serial_speed.disabled = false;
+                    }
+                }
+            </script>
         {% endif %}
     {% endif %}
 {% endblock %}
