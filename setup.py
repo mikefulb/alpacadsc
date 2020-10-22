@@ -55,11 +55,14 @@ setup(
 
     python_requires='>=3.7, <4',
 
-    install_requires=['Flask>=1.1',
-                      'flask-restx>=0.2.0',
+    install_requires=[
                       'astropy>=1.10',
+                      'Flask>=1.1',
+                      'flask-restx>=0.2.0',
+                      'marshmallow>=3.8.0',
                       'pyserial>=3',
-                      'pyyaml>=5.3'],  # Optional
+                      'pyyaml>=5.3'
+                     ],  # Optional
 
     extras_require={}, # Optional
 

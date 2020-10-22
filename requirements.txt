@@ -1,6 +1,7 @@
+astropy >= 1.10
 Flask >= 1.1
 flask-restx >= 0.2.0
-astropy >= 1.10
+marshmallow >= 3.8.0
 pyserial >= 3
 pyyaml >= 5.3
 
