@@ -277,7 +277,7 @@ Using With Planetarium Software
 ...............................
 
 First start the Alpaca DSC driver service as shown in the section
-:ref:`Starting The Alpaca Service`.
+:ref:`usage:Starting The Alpaca Service`.
 
 Then use your software to connect to the service.  The software must support
 Alpaca to work with this driver.  You will want to configure the server IP

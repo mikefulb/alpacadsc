@@ -16,7 +16,7 @@ alpacadsc's documentation
    modules
    design
    tests
-
+   releases/index.rst
 
 Indices and tables
 ==================

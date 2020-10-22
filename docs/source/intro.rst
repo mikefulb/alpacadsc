@@ -29,7 +29,5 @@ target.  This should improve the pointing accuracy.  Do this as necessary as
 you move around the sky.
 
 Before using :strong:`alpacadsc` it is necessary to configure a profile for your
-telescope.  This an other usage details are covered in the :ref:`Usage`
+telescope.  This an other usage details are covered in the :ref:`usage:Usage`
 section.
-
-

@@ -1,0 +1,29 @@
+==============================
+Alpacadsc 0.20.8 release notes
+==============================
+
+*October 23, 2020*
+
+What's new in AlpacaDSC 0.20.8
+==============================
+
+Generic DSC encoder driver
+--------------------------
+
+The :strong:`Generic` encoder driver uses a common command set from many types of DSC devices.
+
+The following devices should work (but haven't been tested!):
+
+  * Software Bisque BBox
+
+  * Astrodevices Nexus
+
+  * Intelliscope and NGCMax
+
+Bugfixes
+========
+
+* Test cases adjusted to work with refactored code.
+
+* Fixed manifest for package creation.
+

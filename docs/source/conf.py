@@ -41,6 +41,9 @@ extensions = [
         'sphinx_rtd_theme'
 ]
 
+# prevent name collision from 'Bugfixes' in all release notes
+autosectionlabel_prefix_document = True
+
 # disable Google style (use NumPy)
 napoleon_google_docstring = False
 

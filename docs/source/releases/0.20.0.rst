@@ -1,0 +1,33 @@
+==============================
+Alpacadsc 0.20.0 release notes
+==============================
+
+*October 19, 2020*
+
+Alpacadsc 0.20.0 is a major refactor of the 0.10.0 code base.  The new codebase
+attempts to use a more traditional pattern for Flask appliations.  The Flask
+extension 'flask-restx' is now used for handle the REST API.
+
+Profiles from previous version of :strong:`alpacadsc` are compatible with this release.
+
+What's new in AlpacaDSC 0.20.0
+==============================
+
+Encoder driver plugins
+----------------------
+
+AlpacaDSC now can discover encoder driver plugins at runtime.  The plugins are
+python modules which are short and easy to create for new DSC devices.  The
+web based setup page will be aware of any detected drivers as well.
+
+Bugfixes
+========
+
+* Numerous improvements to documentation.
+
+* Documentation will now build on readthedocs.
+
+* PEP 8 compliance improvements.
+
+* Improved package building.
+
