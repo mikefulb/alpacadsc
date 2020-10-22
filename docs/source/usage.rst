@@ -96,6 +96,10 @@ The service accepts several command line options:
 
    List all profiles which are currently defined.
 
+.. option:: --quiet
+
+   Disable all output except warnings and errors.
+
 .. option:: --debug
 
    Show additional debugging information in log file.
@@ -242,13 +246,20 @@ Encoders
 """"""""
 The encoders used by the digital setting circles (DSC) also need to be configured.
 
-Currently the Alpaca service only supports DSC which use the "Dave Eks" protocol
-so the "Driver" should be set to "DaveEk".
+Currently the Alpaca service supports DSC which use the "Dave Eks" protocol
+or a generic driver which should work with most other DSC systems.
 
 The serial port should be configured to match the port the DSC is connected to -
 there will be some suggested ports based on the available ports on the computer.
 
 The serial speed must match that of the DSC - 9600 is typical.
+
+.. note::
+    If using a DSC based on an Arduino it might be necessary to disable
+    the "reset on DTR" functionality of the Arduino.  If enabled this causes the
+    Arduino to reset when the service connects to it and makes the Arduino
+    unavailable for up to several seconds.  This delay causes some
+    programs to timeout when connecting to the Alpaca service.
 
 The resolution of the encoders on the altitude and azimuth axes must also be
 specified.  Common values are 4000, 8000 or 10000.  If this value is wrong
