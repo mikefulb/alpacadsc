@@ -44,6 +44,14 @@ alpacadsc.baseencoders module
     :undoc-members:
     :show-inheritance:
 
+alpacadsc.baseencoders_serial module
+------------------------------------------
+
+.. automodule:: alpacadsc.baseencoders_serial
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 alpacadsc.encoders_altaz_daveek module
 ------------------------------------------
