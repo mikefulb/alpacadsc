@@ -78,8 +78,10 @@ class EncodersSerial(EncodersBase):
         self.port = port
         self.serial = serial.Serial(port, speed, timeout=5)
 
-        # some arduino based dsc will need time as they reset when opened
-        time.sleep(5)
+        # give a little time after open before sending encoder resolution
+        # for an arduino based board that may reset when opened it will
+        # require a hw modification to prevent this
+        time.sleep(0.5)
 
         # set resolution
         self.set_encoder_resolution(self.res_alt, self.res_az)
