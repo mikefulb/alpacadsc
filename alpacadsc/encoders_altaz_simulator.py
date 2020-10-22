@@ -86,9 +86,7 @@ class EncodersAltAzSimulator(EncodersBase):
             (ttuple)  The position of the altitude and azimuth encoders.
 
         """
-        alt_steps = 2000
-        az_steps = 2000
-        return alt_steps, az_steps
+        return self.res_alt/2, self.res_az/2
 
     def set_encoder_resolution(self, res_alt, res_az):
         """
